@@ -1,22 +1,18 @@
 import jwt from 'jsonwebtoken'
 import { Cjwt } from '../config/index'
-const SECRET = Cjwt.secret
-const REFRESH_SECRET = Cjwt.refreshSecret
-const AccessEXPIRES_IN = Cjwt.expiresIn
-const RefreshEXPIRES_IN = Cjwt.refreshExpiresIn
   
 
 export const generateToken = (userId: string) => {
-  return jwt.sign({ userId }, SECRET, { expiresIn: AccessEXPIRES_IN })
+  return jwt.sign({ userId }, Cjwt.secret, { expiresIn: Cjwt.expiresIn })
 }
 
 export const generateRefreshToken = (userId: string) => {
-  return jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: RefreshEXPIRES_IN })
+  return jwt.sign({ userId }, Cjwt.refreshSecret, { expiresIn: Cjwt.refreshExpiresIn })
 }
 
 export const verifyToken = (token: string) => {
   try {
-    return jwt.verify(token, SECRET)
+    return jwt.verify(token, Cjwt.secret)
   } catch {
     return null
   }
@@ -24,7 +20,7 @@ export const verifyToken = (token: string) => {
 
 export const verifyRefreshToken = (token: string) => {
   try {
-    return jwt.verify(token, REFRESH_SECRET)
+    return jwt.verify(token, Cjwt.refreshSecret)
   } catch {
     return null
   }

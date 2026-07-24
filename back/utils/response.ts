@@ -1,5 +1,5 @@
-export const success = (data: any, message = 'success') => {
-  return { code: 200, data, message }
+export const success = (data: any, message?: string) => {
+  return { code: 200, data, [`success${message}`]: true }
 }
 
 export const error = (message: string, code: number) => {
@@ -7,11 +7,11 @@ export const error = (message: string, code: number) => {
 }
 
 export const errors = {
-  notFound: (msg = '资源不存在') => error(msg, 404),
-  unauthorized: (msg = '未授权') => error(msg, 401),
-  forbidden: (msg = '禁止访问') => error(msg, 403),
-  badRequest: (msg = '请求参数错误') => error(msg, 400),
-  internal: (msg = '服务器内部错误') => error(msg, 500),
+  notFound: (msg: string) => error(`资源不存在: ${msg}`, 404),
+  unauthorized: (msg: string) => error(`未授权: ${msg}`, 401),
+  forbidden: (msg: string) => error(`禁止访问: ${msg}`, 403),
+  badRequest: (msg: string) => error(`请求参数错误: ${msg}`, 400),
+  internal: (msg: string) => error(`服务器内部错误: ${msg}`, 500),
 }
 
 

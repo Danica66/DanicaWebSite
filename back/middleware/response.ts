@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
-import { success, error } from '../utils/response'
+import { success, error,errors } from '../utils'
 
-// 这个中间件给 res 对象挂上快捷方法
 export const responseWrapper = (req: Request, res: Response, next: NextFunction) => {
   // res.success(data, message) -> 自动包装成统一格式
-  res.success = function (data: any, message = 'success') {
-    return this.status(200).json(success(data, message))
+  res.success = function (data: any) {
+    return this.status(200).json(success(data))
   }
 
   // res.error(message, code, status) -> 自动包装错误格式
@@ -14,18 +13,22 @@ export const responseWrapper = (req: Request, res: Response, next: NextFunction)
   }
 
   // res.notFound(message) -> 404 快捷方式
-  res.notFound = function (message = '资源不存在') {
-    return this.status(404).json(error(message, 404))
+  res.notFound = function (message: string) {
+    return this.status(404).json(errors.notFound(message))
   }
 
   // res.unauthorized(message) -> 401 快捷方式
-  res.unauthorized = function (message = '未授权') {
-    return this.status(401).json(error(message, 401))
+  res.unauthorized = function (message: string) {
+    return this.status(401).json(errors.unauthorized(message))
   }
 
   // res.internalError(message) -> 500 快捷方式
-  res.internalError = function (message = '服务器错误') {
-    return this.status(500).json(error(message, 500))
+  res.internalError = function (message: string) {
+    return this.status(500).json(errors.internal(message))
+  }
+  //res.badRequest(message)-> 400 快捷方式
+  res.badRequest=function(message:string){
+    return this.status(400).json(errors.badRequest(message))
   }
 
   next()

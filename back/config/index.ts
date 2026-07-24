@@ -18,6 +18,10 @@ export const config = {
     expiresIn: '1d' as const,
     refreshExpiresIn: '7d' as const,
   },
+  //bcrypt
+  Cbcrypt: {
+    saltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10'),
+  },
 
   //mysql
   Cdatabase: {
@@ -35,4 +39,4 @@ export const config = {
 }
 
 // 导出常用配置（方便使用）
-export const { Cserver, Cjwt, Cdatabase } = config
+export const { Cserver, Cjwt, Cdatabase, Cbcrypt } = config
