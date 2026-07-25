@@ -24,7 +24,7 @@ app.use(authMiddleware)//全局鉴权token
 
 //routes
 app.use('/api/auth', authRoutes)           // 登录注册不需要鉴权
-// app.use('/api/chat', authMiddleware, chatRoutes)  // 聊天需要登录
+// app.use('/api/chat', chatRoutes)  // 聊天需要登录
 // app.use('/api/articles', articlesRoutes)   // 文章列表公开，增删改需要鉴权
 
 

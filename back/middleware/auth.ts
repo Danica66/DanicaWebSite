@@ -7,7 +7,6 @@ const PUBLIC_PATTERNS = [
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/refresh',
-  '/api/health',
   '/public/*',        // /public/ 下的所有路径
   '/uploads/*',       // /uploads/ 下的所有路径
   '*.html',           // 所有 .html 文件
