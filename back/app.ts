@@ -5,8 +5,10 @@ import dotenv from 'dotenv'//把敏感信息（密码、密钥、API Key）放�
 import authRoutes from './routes/auth'
 // import chatRoutes from './routes/chat'
 import articlesRoutes from './routes/articles'
+import rssRoutes from './routes/rss'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver } from './config/index'
+import { authLimiter, publicLimiter, globalLimiter } from './middleware/rateLimit'
 
 
 //init
@@ -21,11 +23,15 @@ app.use(express.urlencoded({ extended: true }));// 解析 URL 编码的请求体
 app.use(responseWrapper);// 统一响应格式中间件
 app.use(authMiddleware)//全局鉴权token
 
+// 限流 + 路由（限流在路由之前）
+app.use('/api', globalLimiter)              // 全局兜底: 15分钟200次
+
 
 //routes
-app.use('/api/auth', authRoutes)           // 登录注册不需要鉴权
+app.use('/api/auth', authLimiter, authRoutes)          // 登录/注册: 1分钟5次
 // app.use('/api/chat', chatRoutes)  // 聊天需要登录
-app.use('/api/articles', articlesRoutes)   // 文章列表公开，增删改需要鉴权
+app.use('/api/articles', publicLimiter, articlesRoutes) // 公开文章: 15分钟100次
+app.use('/api/rss', rssRoutes)                         // RSS 订阅源（公开）
 
 
 

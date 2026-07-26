@@ -8,10 +8,10 @@ export const loginController = async (req: Request, res: Response) => {
     const username=body.username
     const password=body.password
     if(!username||!password){
-        res.badRequest("用户名或密码不能为空")
+        return res.badRequest("用户名或密码不能为空")
     }
     try {
-        return res.success(await loginService(body,username,password), '登录成功')
+        return res.success(await loginService(body), '登录成功')
     } catch (err) {
         console.error('登录失败:', err)
         return res.internalError('登录失败，请稍后重试')

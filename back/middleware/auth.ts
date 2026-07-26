@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   { path: '/api/auth/register', methods: ['POST'] },
   { path: '/api/auth/refresh', methods: ['POST'] },
   { path: '/api/articles', methods: ['GET'] },
+  { path: '/api/rss', methods: ['GET'] },
 ]
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {

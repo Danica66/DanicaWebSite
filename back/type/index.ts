@@ -18,7 +18,7 @@ declare global {
 }
 //user接口(类型)
 export interface UserPayload {
-  userId: string
+  userId: number
 }
 //login
 export interface UserLogin {
@@ -29,6 +29,7 @@ export interface UserLogin {
 export interface Article {
   id?: number
   title: string
+  status?: 'draft' | 'published'
   content: string
   summary?: string
   author_id: number

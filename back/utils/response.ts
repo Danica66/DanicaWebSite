@@ -1,5 +1,5 @@
 export const success = (data: any, message?: string) => {
-  return { code: 200, data, [`success${message}`]: true }
+  return { code: 200, data, message}
 }
 
 export const error = (message: string, code: number) => {

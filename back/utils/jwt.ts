@@ -2,11 +2,11 @@ import jwt from 'jsonwebtoken'
 import { Cjwt } from '../config/index'
   
 
-export const generateToken = (userId: string) => {
+export const generateToken = (userId: number) => {
   return jwt.sign({ userId }, Cjwt.secret, { expiresIn: Cjwt.expiresIn })
 }
 
-export const generateRefreshToken = (userId: string) => {
+export const generateRefreshToken = (userId: number) => {
   return jwt.sign({ userId }, Cjwt.refreshSecret, { expiresIn: Cjwt.refreshExpiresIn })
 }
 

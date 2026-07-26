@@ -3,8 +3,8 @@ import { success, error,errors } from '../utils'
 
 export const responseWrapper = (req: Request, res: Response, next: NextFunction) => {
   // res.success(data, message) -> 自动包装成统一格式
-  res.success = function (data: any) {
-    return this.status(200).json(success(data))
+  res.success = function (data: any, message?: string) {
+    return this.status(200).json(success(data, message))
   }
 
   // res.error(message, code, status) -> 自动包装错误格式
@@ -29,6 +29,10 @@ export const responseWrapper = (req: Request, res: Response, next: NextFunction)
   //res.badRequest(message)-> 400 快捷方式
   res.badRequest=function(message:string){
     return this.status(400).json(errors.badRequest(message))
+  }
+  //res.forbidden(message)-> 403 快捷方式
+  res.forbidden=function(message:string){
+    return this.status(403).json(errors.forbidden(message))
   }
 
   next()
