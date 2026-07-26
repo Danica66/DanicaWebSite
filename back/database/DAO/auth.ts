@@ -1,7 +1,7 @@
 import db from '../index'
 import { RowDataPacket } from 'mysql2'
 import { UserLogin } from '../../type/index'
-//数据库操作
+//查找用户
 export const select_username=(user: UserLogin): Promise<RowDataPacket[]> =>{
     return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM users WHERE username = ?'
@@ -14,10 +14,11 @@ export const select_username=(user: UserLogin): Promise<RowDataPacket[]> =>{
     })
   })
 }
-export const insert_username_password=(user: UserLogin)=>{
+// 插入用户密码
+export const insert_username_password=(user: UserLogin): Promise<RowDataPacket[]>=>{
      return new Promise((resolve, reject) => {
     const sql = 'INSERT INTO users (username, password) VALUES (?, ?)'
-    db.query(sql, [user.username, user.password], (err, result) => {
+    db.query(sql, [user.username, user.password], (err, result:RowDataPacket[]) => {
       if (err) {
         reject(err)
       } else {

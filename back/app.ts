@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from 'dotenv'//把敏感信息（密码、密钥、API Key）放在 .env 文件里，而不是写在代码中
 import authRoutes from './routes/auth'
 // import chatRoutes from './routes/chat'
-// import articlesRoutes from './routes/articles'
+import articlesRoutes from './routes/articles'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver } from './config/index'
 
@@ -25,7 +25,7 @@ app.use(authMiddleware)//全局鉴权token
 //routes
 app.use('/api/auth', authRoutes)           // 登录注册不需要鉴权
 // app.use('/api/chat', chatRoutes)  // 聊天需要登录
-// app.use('/api/articles', articlesRoutes)   // 文章列表公开，增删改需要鉴权
+app.use('/api/articles', articlesRoutes)   // 文章列表公开，增删改需要鉴权
 
 
 

@@ -25,3 +25,14 @@ export interface UserLogin {
   username: string
   password: string
 }
+//article
+export interface Article {
+  id?: number
+  title: string
+  content: string
+  summary?: string
+  author_id: number
+  view_count?: number
+  created_at?: Date
+  updated_at?: Date
+}

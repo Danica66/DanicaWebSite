@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import { login, register ,refresh} from '../controllers/authController.ts'
+import { loginController, registerController ,refreshController} from '../controllers/auth.ts'
 
 const router = Router()
 
-router.post('/login', login)
-router.post('/register', register)
-router.post('/refresh', refresh)
+router.post('/login', loginController)
+router.post('/register', registerController)
+router.post('/refresh', refreshController)
 
 export default router
