@@ -1,5 +1,5 @@
-import { UserLogin } from "../type"
-import { insert_username_password,select_username } from "../database/DAO/auth" 
+import { UserLogin, UserProfile } from "../type"
+import { insert_username_password,select_username,select_user_by_id,update_user } from "../database/DAO/auth" 
 import { compare,hash } from "../utils"
 import { JwtPayload } from 'jsonwebtoken'
 import { generateToken,generateRefreshToken,verifyRefreshToken } from "../utils"
@@ -31,6 +31,8 @@ export const registerService=async (body:UserLogin,username:string,password:stri
     const hashedPassword =await hash(password)
     const newuser:UserLogin={
         username:username,
+        nickname: body.nickname,
+        email: body.email,
         password:hashedPassword
     }
     await insert_username_password(newuser)
@@ -43,4 +45,15 @@ export const refreshService=async(refreshtoken:string)=>{
     }
     const accesstoken=generateToken(decoded.userId)
     return {accesstoken}
+}
+export const getProfileService=async(userId:number)=>{
+    const rows=await select_user_by_id(userId)
+    if(rows.length===0){
+        throw new Error('用户不存在')
+    }
+    const {password,...profile}=rows[0]
+    return profile
+}
+export const updateProfileService=async(userId:number,profile:UserProfile)=>{
+    return await update_user(userId,profile)
 }

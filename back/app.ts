@@ -5,6 +5,7 @@ import dotenv from 'dotenv'//把敏感信息（密码、密钥、API Key）放�
 import authRoutes from './routes/auth'
 // import chatRoutes from './routes/chat'
 import articlesRoutes from './routes/articles'
+import userRoutes from './routes/user'
 import rssRoutes from './routes/rss'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver } from './config/index'
@@ -31,6 +32,7 @@ app.use('/api', globalLimiter)              // 全局兜底: 15分钟200次
 app.use('/api/auth', authLimiter, authRoutes)          // 登录/注册: 1分钟5次
 // app.use('/api/chat', chatRoutes)  // 聊天需要登录
 app.use('/api/articles', publicLimiter, articlesRoutes) // 公开文章: 15分钟100次
+app.use('/api/user', userRoutes)                       // 用户信息（需登录）
 app.use('/api/rss', rssRoutes)                         // RSS 订阅源（公开）
 
 
