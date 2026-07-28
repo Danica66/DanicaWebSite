@@ -14,6 +14,9 @@ export const loginController = async (req: Request, res: Response) => {
         return res.success(await loginService(body), '登录成功')
     } catch (err) {
         console.error('登录失败:', err)
+        if (err?.message) {
+            return res.badRequest(err.message)
+        }
         return res.internalError('登录失败，请稍后重试')
     }
 }
@@ -30,6 +33,9 @@ export const registerController = async(req: Request, res: Response) => {
         return res.success(await registerService(body,username,password), '注册成功')
     } catch (err) {
         console.error('注册失败:', err)
+        if (err?.message === '用户名已存在') {
+            return res.badRequest(err.message)
+        }
         return res.internalError('注册失败，请稍后重试')
     }
 }

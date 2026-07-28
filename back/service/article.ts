@@ -1,7 +1,12 @@
-import { select_article,select_articlebyid,select_article_userid,insert_article,delete_articlebyid,update_article_viewcount,update_article,select_articles_mine } from "../database/DAO/article"
+import { select_article,select_article_count,select_articlebyid,select_article_userid,insert_article,delete_articlebyid,update_article_viewcount,update_article,select_articles_mine } from "../database/DAO/article"
 import { Article } from "../type"
 export const getArticleListService=async (page:number,limit:number,keyword:string)=>{
-    return await select_article(page,limit,keyword)
+    const [list, countResult] = await Promise.all([
+        select_article(page, limit, keyword),
+        select_article_count(keyword),
+    ])
+    const total = (countResult[0] as any).total || 0
+    return { list, total }
 }
 export const getSingleArticleService=async(id:number)=>{
     await update_article_viewcount(id)

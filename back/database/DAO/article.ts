@@ -29,6 +29,19 @@ export const select_article =(page:number,limit:number,keyword:string): Promise<
     })
   })
 }
+// 文章总数（分页用）
+export const select_article_count =(keyword:string): Promise<RowDataPacket[]>=>{
+   return new Promise((resolve, reject) => {
+    const sql = 'SELECT COUNT(*) as total FROM articles WHERE status = \'published\' AND (title LIKE ? OR content LIKE ?)'
+    db.query(sql, [`%${keyword}%`,`%${keyword}%`], (err, result:RowDataPacket[]) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(result)
+      }
+    })
+  })
+}
 //id查找文章
 export const select_articlebyid =(id:number): Promise<RowDataPacket[]>=>{
    return new Promise((resolve, reject) => {

@@ -1,0 +1,43 @@
+/* 亮色主题（默认） */
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #fff;
+  --text: #333;
+  --text-secondary: #777;
+  --text-muted: #bbb;
+  --border: #eee;
+  --primary: #409eff;
+  --primary-light: #6fb3f8;
+  --navbar-bg: #fff;
+  --shadow: rgba(0, 0, 0, 0.04);
+  --card-shadow: rgba(0, 0, 0, 0.08);
+}
+
+/* 暗色主题 */
+html.dark {
+  --bg: #1a1a2e;
+  --bg-card: #252540;
+  --text: #e0e0e0;
+  --text-secondary: #aaa;
+  --text-muted: #666;
+  --border: #333;
+  --primary: #6fb3f8;
+  --primary-light: #409eff;
+  --navbar-bg: #1e1e32;
+  --shadow: rgba(0, 0, 0, 0.2);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}

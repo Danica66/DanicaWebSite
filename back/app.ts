@@ -26,9 +26,6 @@ app.use(authMiddleware)//全局鉴权token
 
 // 限流 + 路由（限流在路由之前）
 app.use('/api', globalLimiter)              // 全局兜底: 15分钟200次
-
-
-//routes
 app.use('/api/auth', authLimiter, authRoutes)          // 登录/注册: 1分钟5次
 // app.use('/api/chat', chatRoutes)  // 聊天需要登录
 app.use('/api/articles', publicLimiter, articlesRoutes) // 公开文章: 15分钟100次
@@ -39,7 +36,7 @@ app.use('/api/rss', rssRoutes)                         // RSS 订阅源（公开
 
 // 404
 app.use((req, res) => {
-  res.status(404).json({ code: 404, message: '接口不存在' })
+  res.notFound('接口不存在')
 })
 
 //run server
