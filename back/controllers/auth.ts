@@ -24,13 +24,11 @@ export const registerController = async(req: Request, res: Response) => {
     const body: UserLogin = req.body;
     const username=body.username
     const password=body.password
-    const nickname=req.body.nickname
-    const email=req.body.email
     if (!username || !password) {
         return res.badRequest('用户名和密码不能为空')
     }
     try {
-        return res.success(await registerService(body,username,password), '注册成功')
+        return res.success(await registerService(body), '注册成功')
     } catch (err) {
         console.error('注册失败:', err)
         if (err?.message === '用户名已存在') {

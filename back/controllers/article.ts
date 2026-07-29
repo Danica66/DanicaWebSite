@@ -5,12 +5,12 @@ export const getArticleListController=async (req:Request,res:Response)=>{
     const page = parseInt(req.query.page as string)
     const limit = parseInt(req.query.limit as string)
     const keyword = req.query.keyword as string
-    if(!page){
-        return res.badRequest('少参数page')
+    if (!page || page < 1) {
+        return res.badRequest('page 必须 >= 1')
     }
-    if(!limit){
-        return res.badRequest('少参数limit')
-    }    
+    if (!limit || limit < 1 || limit > 100) {
+        return res.badRequest('limit 必须为 1–100')
+    }
     try {
         return res.success(await getArticleListService(page,limit,keyword),'获取文章成功')
     } catch (err) {

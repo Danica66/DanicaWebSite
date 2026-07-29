@@ -11,7 +11,10 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@vueup/vue-quill": "^1.5.5",
     "axios": "^1.18.1",
+    "dompurify": "^3.4.12",
     "element-plus": "^2.14.3",
     "pinia": "^3.0.4",
     "vue": "^3.5.28",

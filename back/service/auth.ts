@@ -23,20 +23,15 @@ export const loginService=async (body:UserLogin)=>{
     username: user.username,
   }
 }
-export const registerService=async (body:UserLogin,username:string,password:string)=>{
+export const registerService=async (body:UserLogin)=>{
     const existing = await select_username(body)
     if (existing.length > 0) {
         throw new Error('用户名已存在')
     }
-    const hashedPassword =await hash(password)
-    const newuser:UserLogin={
-        username:username,
-        nickname: body.nickname,
-        email: body.email,
-        password:hashedPassword
-    }
+    const hashedPassword =await hash(body.password)
+    const newuser:UserLogin = { ...body, password: hashedPassword }
     await insert_username_password(newuser)
-    return { username }
+    return { username: body.username }
 }
 export const refreshService=async(refreshtoken:string)=>{
     const decoded=verifyRefreshToken(refreshtoken) as JwtPayload

@@ -30,4 +30,21 @@ export const articleApi = {
   getMine(params: { page: number; limit: number; status?: string }) {
     return api.Get('/articles/mine', params);
   },
-};
+}
+
+export const userApi = {
+  getProfile() {
+    return api.Get('/user/profile')
+  },
+  updateProfile(data: { nickname?: string; email?: string; avatar?: string }) {
+    return api.Put('/user/profile', data)
+  },
+}
+
+export const uploadApi = {
+  uploadAvatar(file: File) {
+    const form = new FormData()
+    form.append('file', file, file.name)
+    return api.Post('/upload', form)
+  },
+}

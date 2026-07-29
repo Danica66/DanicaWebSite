@@ -1,5 +1,6 @@
 import { useauthStore } from "@/stores/auth";
 import axios from "axios";
+import { ElMessage } from "element-plus";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
 const timeout = parseInt(import.meta.env.VITE_TIMEOUT, 10) || 10000
@@ -28,15 +29,18 @@ instance.interceptors.response.use(
     },
     async (err)=>{//401自动刷新,无效则return
         const req=err.config
-        if(err.response?.status===401&&!req._retry){
+        const isRefreshReq = req.url?.includes('/auth/refresh')
+        if(!isRefreshReq && err.response?.status===401 && !req._retry){
             req._retry=true
             const authstore=useauthStore()
             try {
                 await authstore.refresh()
-                req.headers.Authorization=`Bearer ${authstore.accesstoken}`   
+                req.headers.Authorization=`Bearer ${authstore.accesstoken}`
                 return instance(req)
             }catch{
-                authstore.logout()
+                ElMessage.warning('登录已过期，请重新登录')
+                await authstore.logout()
+                window.location.href = '/login'
             }
         }
         return Promise.reject(err)

@@ -6,18 +6,13 @@ import { articleApi } from '@/api/handleapi'
 const router = useRouter()
 
 const articles = ref<any[]>([])
-const keyword = ref('')
-const page = ref(1)
-const total = ref(0)
 const loading = ref(false)
-const limit = 10
 
-const fetchArticles = async () => {
+const fetchRecent = async () => {
   loading.value = true
   try {
-    const res: any = await articleApi.getList({ page: page.value, limit, keyword: keyword.value })
+    const res: any = await articleApi.getList({ page: 1, limit: 5, keyword: '' })
     articles.value = res.data.list || []
-    total.value = res.data.total || 0
   } catch {
     articles.value = []
   } finally {
@@ -25,24 +20,9 @@ const fetchArticles = async () => {
   }
 }
 
-const handleSearch = () => {
-  page.value = 1
-  fetchArticles()
-}
+const goDetail = (id: number) => router.push(`/articles/${id}`)
 
-const handlePageChange = (newPage: number) => {
-  page.value = newPage
-  fetchArticles()
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-const goDetail = (id: number) => {
-  router.push(`/articles/${id}`)
-}
-
-onMounted(() => {
-  fetchArticles()
-})
+onMounted(() => fetchRecent())
 </script>
 
 <template>
@@ -53,63 +33,39 @@ onMounted(() => {
       <p>记录思考，分享知识。每一篇文章都是一次对话。</p>
     </section>
 
-    <!-- 搜索栏 -->
-    <div class="search-bar">
-      <el-input
-        v-model="keyword"
-        placeholder="搜索文章..."
-        clearable
-        class="search-input"
-        @keyup.enter="handleSearch"
-      />
-      <el-button type="primary" @click="handleSearch">搜索</el-button>
-    </div>
+    <!-- 最新文章 -->
+    <section class="recent">
+      <div class="recent-header">
+        <h2>最新文章</h2>
+        <router-link to="/articles" class="view-all">查看全部 →</router-link>
+      </div>
 
-    <!-- 加载中 -->
-    <div v-if="loading" class="state-tip">
-      <p>加载中...</p>
-    </div>
+      <div v-if="loading" class="state-tip">加载中...</div>
 
-    <!-- 空状态 -->
-    <div v-else-if="articles.length === 0" class="state-tip">
-      <p class="empty-text">暂无文章</p>
-    </div>
+      <div v-else-if="articles.length === 0" class="state-tip">
+        <p>暂无文章</p>
+      </div>
 
-    <!-- 文章列表 -->
-    <div v-else class="article-list">
-      <article
-        v-for="item in articles"
-        :key="item.id"
-        class="card"
-        @click="goDetail(item.id)"
-      >
-        <div class="card-body">
-          <h2 class="card-title">{{ item.title }}</h2>
-          <p class="card-summary">
-            {{ item.summary || item.content?.replace(/<[^>]*>/g, '').slice(0, 120) || '暂无摘要' }}
-          </p>
-          <div class="card-meta">
-            <span class="meta-date">{{ item.created_at?.slice(0, 10) }}</span>
-            <span class="meta-views">{{ item.view_count || 0 }} 次阅读</span>
+      <div v-else class="article-list">
+        <article
+          v-for="item in articles"
+          :key="item.id"
+          class="card"
+          @click="goDetail(item.id)"
+        >
+          <div class="card-body">
+            <h3 class="card-title">{{ item.title }}</h3>
+            <p class="card-summary">
+              {{ item.summary || item.content?.replace(/<[^>]*>/g, '').slice(0, 120) || '暂无摘要' }}
+            </p>
+            <div class="card-meta">
+              <span>{{ item.created_at?.slice(0, 10) }}</span>
+              <span>{{ item.view_count || 0 }} 次阅读</span>
+            </div>
           </div>
-        </div>
-        <div class="card-arrow">
-          <span>→</span>
-        </div>
-      </article>
-    </div>
-
-    <!-- 分页 -->
-    <div v-if="total > limit" class="pager">
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :total="total"
-        :page-size="limit"
-        v-model:current-page="page"
-        @current-change="handlePageChange"
-      />
-    </div>
+        </article>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -120,7 +76,7 @@ onMounted(() => {
   padding: 64px 24px 48px;
   background: linear-gradient(135deg, #409eff 0%, #6fb3f8 100%);
   color: #fff;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 .banner h1 {
   font-size: 32px;
@@ -132,39 +88,47 @@ onMounted(() => {
   opacity: 0.9;
 }
 
-/* 搜索 */
-.search-bar {
-  max-width: 640px;
-  margin: 0 auto 32px;
-  display: flex;
-  gap: 12px;
-  padding: 0 24px;
-}
-.search-input {
-  flex: 1;
-}
-
-/* 状态提示 */
-.state-tip {
-  text-align: center;
-  padding: 80px 0;
-  color: var(--text-muted);
-}
-.empty-text {
-  font-size: 16px;
-}
-
-/* 文章卡片 */
-.article-list {
+/* 最新文章 */
+.recent {
   max-width: 720px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 24px 64px;
+}
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+}
+.recent-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+.view-all {
+  font-size: 14px;
+  color: var(--primary);
+  text-decoration: none;
+}
+.view-all:hover {
+  text-decoration: underline;
+}
+
+/* 状态 */
+.state-tip {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--text-muted);
+}
+
+/* 卡片列表 */
+.article-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 .card {
-  display: flex;
-  align-items: center;
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: 20px 24px;
   background: var(--bg-card);
   border-radius: 10px;
   cursor: pointer;
@@ -176,21 +140,17 @@ onMounted(() => {
   box-shadow: 0 6px 20px var(--card-shadow);
   border-color: var(--primary);
 }
-.card-body {
-  flex: 1;
-}
 .card-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 8px;
-  line-height: 1.4;
+  margin-bottom: 6px;
 }
 .card-summary {
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.7;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -202,21 +162,5 @@ onMounted(() => {
   gap: 16px;
   font-size: 13px;
   color: var(--text-muted);
-}
-.card-arrow {
-  font-size: 20px;
-  color: var(--text-muted);
-  padding-left: 16px;
-  transition: color 0.2s;
-}
-.card:hover .card-arrow {
-  color: #409eff;
-}
-
-.pager {
-  display: flex;
-  justify-content: center;
-  margin-top: 32px;
-  padding-bottom: 24px;
 }
 </style>

@@ -10,7 +10,8 @@ export const getArticleListService=async (page:number,limit:number,keyword:strin
 }
 export const getSingleArticleService=async(id:number)=>{
     await update_article_viewcount(id)
-    return await select_articlebyid(id)
+    const rows = await select_articlebyid(id)
+    return rows[0] || null
 }
 export const releaseArticleService=async(article:Article)=>{
     return await insert_article(article)

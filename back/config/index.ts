@@ -15,8 +15,8 @@ export const config = {
   Cjwt: {
     secret: process.env.JWT_SECRET || '',
     refreshSecret: process.env.REFRESH_SECRET || '',
-    expiresIn: '1d' as const,
-    refreshExpiresIn: '7d' as const,
+    expiresIn: '1h' as const,
+    refreshExpiresIn: '1d' as const,
   },
   //bcrypt
   Cbcrypt: {

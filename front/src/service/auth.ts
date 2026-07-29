@@ -6,8 +6,8 @@ export const authService={
             throw new Error("用户名密码不能为空")
         }
         const res=await authApi.login({username,password})
-        const {accesstoken,refreshtoken,userId}=res.data
-        return {accesstoken,refreshtoken,user:{id:userId,name:username}}
+        const {accesstoken,refreshtoken,userId,username: serverUsername}=res.data
+        return {accesstoken,refreshtoken,user:{id:userId,name:serverUsername}}
     },
     async register(username:string,password:string){
         if(!username||!password){

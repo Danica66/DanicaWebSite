@@ -35,6 +35,7 @@ const handleLogout = () => {
       <div class="nav-inner">
         <router-link to="/" class="logo">Danica</router-link>
         <div class="nav-links">
+          <router-link to="/articles">文章</router-link>
           <router-link v-if="authStore.isLogin" to="/mine">我的文章</router-link>
           <router-link v-if="authStore.isLogin" to="/articles/create">写文章</router-link>
 
@@ -43,7 +44,7 @@ const handleLogout = () => {
           </span>
 
           <template v-if="authStore.isLogin">
-            <span class="user-tag">{{ authStore.username }}</span>
+            <router-link to="/profile" class="user-tag">{{ authStore.username }}</router-link>
             <span class="logout-btn" @click="handleLogout">退出</span>
           </template>
           <template v-else>

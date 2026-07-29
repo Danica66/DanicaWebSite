@@ -2,19 +2,18 @@ import { Request, Response, NextFunction } from 'express'
 import { verifyToken } from '../utils/jwt'
 import { UserPayload } from '../type'
 
-// ===== 白名单配置 =====
 const PUBLIC_ROUTES = [
-  { path: '/api/auth/login', methods: ['POST'] },
-  { path: '/api/auth/register', methods: ['POST'] },
-  { path: '/api/auth/refresh', methods: ['POST'] },
-  { path: '/api/articles', methods: ['GET'] },
-  { path: '/api/rss', methods: ['GET'] },
+  { regex: /^\/api\/auth\/login$/,    methods: ['POST'] },
+  { regex: /^\/api\/auth\/register$/, methods: ['POST'] },
+  { regex: /^\/api\/auth\/refresh$/,  methods: ['POST'] },
+  { regex: /^\/api\/articles$/,       methods: ['GET'] },
+  { regex: /^\/api\/rss$/,            methods: ['GET'] },
+  { regex: /^\/api\/articles\/\d+$/, methods: ['GET'] },
 ]
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // 检查白名单（路径 + 方法）
   for (const route of PUBLIC_ROUTES) {
-    if (route.path === req.path && route.methods.includes(req.method)) {
+    if (route.regex.test(req.path) && route.methods.includes(req.method)) {
       return next()
     }
   }
