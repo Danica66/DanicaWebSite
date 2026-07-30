@@ -48,3 +48,15 @@ export const uploadApi = {
     return api.Post('/upload', form)
   },
 }
+
+export const commentApi = {
+  getList(articleId: number) {
+    return api.Get(`/articles/${articleId}/comments`)
+  },
+  create(articleId: number, data: { content: string; parent_id?: number | null }) {
+    return api.Post(`/articles/${articleId}/comments`, data)
+  },
+  delete(commentId: number) {
+    return api.Delete(`/comments/${commentId}`)
+  },
+}

@@ -2,9 +2,15 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
-
+//init
 const router = useRouter()
 const authStore = useauthStore()
+
+const siteName = import.meta.env.VITE_SITE_NAME || 'Danica'
+
+// 移动端菜单
+const menuOpen = ref(false)
+const closeMenu = () => { menuOpen.value = false }
 
 // 黑夜模式
 const isDark = ref(false)
@@ -33,23 +39,26 @@ const handleLogout = () => {
   <div class="app-shell">
     <header class="navbar">
       <div class="nav-inner">
-        <router-link to="/" class="logo">Danica</router-link>
-        <div class="nav-links">
-          <router-link to="/articles">文章</router-link>
-          <router-link v-if="authStore.isLogin" to="/mine">我的文章</router-link>
-          <router-link v-if="authStore.isLogin" to="/articles/create">写文章</router-link>
+        <router-link to="/" class="logo">{{ siteName }}</router-link>
+        <button class="hamburger" @click="menuOpen = !menuOpen">
+          {{ menuOpen ? '✕' : '☰' }}
+        </button>
+        <div class="nav-links" :class="{ open: menuOpen }">
+          <router-link to="/articles" @click="closeMenu">文章</router-link>
+          <router-link v-if="authStore.isLogin" to="/mine" @click="closeMenu">我的文章</router-link>
+          <router-link v-if="authStore.isLogin" to="/articles/create" @click="closeMenu">写文章</router-link>
 
           <span class="theme-btn" @click="toggleDark">
             {{ isDark ? '☀️' : '🌙' }}
           </span>
 
           <template v-if="authStore.isLogin">
-            <router-link to="/profile" class="user-tag">{{ authStore.username }}</router-link>
+            <router-link to="/profile" class="user-tag" @click="closeMenu">{{ authStore.username }}</router-link>
             <span class="logout-btn" @click="handleLogout">退出</span>
           </template>
           <template v-else>
-            <router-link to="/login">登录</router-link>
-            <router-link to="/register" class="register-link">注册</router-link>
+            <router-link to="/login" @click="closeMenu">登录</router-link>
+            <router-link to="/register" class="register-link" @click="closeMenu">注册</router-link>
           </template>
         </div>
       </div>
@@ -60,7 +69,7 @@ const handleLogout = () => {
     </main>
 
     <footer class="footer">
-      <p>Danica · 个人博客</p>
+      <p>{{ siteName }} · 个人博客</p>
     </footer>
   </div>
 </template>
@@ -97,6 +106,19 @@ const handleLogout = () => {
   text-decoration: none;
   user-select: none;
 }
+
+/* 汉堡按钮（默认隐藏，移动端显示） */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
 .nav-links {
   display: flex;
   align-items: center;
@@ -150,5 +172,35 @@ const handleLogout = () => {
   font-size: 13px;
   border-top: 1px solid var(--border);
   margin-top: 40px;
+}
+
+/* ===== 移动端 ===== */
+@media (max-width: 768px) {
+  .nav-inner {
+    padding: 0 16px;
+  }
+
+  /* 显示汉堡按钮 */
+  .hamburger {
+    display: block;
+  }
+
+  /* 导航链接收起，展开时变成竖向菜单 */
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: var(--navbar-bg);
+    padding: 16px;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  .nav-links.open {
+    display: flex;
+  }
 }
 </style>

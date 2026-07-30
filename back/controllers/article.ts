@@ -35,6 +35,7 @@ export const releaseArticleController=async(req:Request,res:Response)=>{
         title:req.body.title,
         content:req.body.content,
         summary: req.body.summary,
+        cover_image: req.body.cover_image,
         status: req.body.status,
         author_id: req.user.userId
     } 

@@ -39,8 +39,21 @@ export interface Article {
   status?: 'draft' | 'published'
   content: string
   summary?: string
+  cover_image?: string
   author_id: number
   view_count?: number
   created_at?: Date
   updated_at?: Date
+}
+//comment
+export interface Comment {
+  id?: number
+  article_id: number
+  user_id: number
+  parent_id: number | null
+  content: string
+  created_at?: string
+  updated_at?: string
+  username?: string
+  avatar?: string
 }

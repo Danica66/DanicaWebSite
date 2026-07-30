@@ -5,41 +5,28 @@ import { userApi } from '@/api/handleapi'
 import { uploadApi } from '@/api/handleapi'
 import { useauthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
-
+import StateTip from '@/components/StateTip.vue'
+//init
 const authStore = useauthStore()
-
+//var
 const loading = ref(true)
 const saving = ref(false)
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
-
+//创建信息格式
 const form = ref({
   nickname: '',
   email: '',
   avatar: '',
 })
-
+//去掉api前缀,否则图片无法加载
 const apiBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '') || ''
 const avatarUrl = computed(() => {
   return form.value.avatar ? apiBase + form.value.avatar : ''
 })
-
-onMounted(async () => {
-  loading.value = true
-  try {
-    const res: any = await userApi.getProfile()
-    const p = res.data
-    form.value.nickname = p.nickname || ''
-    form.value.email = p.email || ''
-    form.value.avatar = p.avatar || ''
-  } catch {
-    ElMessage.error('加载用户信息失败')
-  } finally {
-    loading.value = false
-  }
-})
-
+//保存
 const handleSave = async () => {
+  //原理同Home.vue->fetchRecent
   saving.value = true
   try {
     await userApi.updateProfile({
@@ -54,14 +41,15 @@ const handleSave = async () => {
     saving.value = false
   }
 }
-
+//上传
 const handleUpload = async (e: Event) => {
+  //原理同上
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
   uploading.value = true
   try {
-    const res: any = await uploadApi.uploadAvatar(file)
+    const res= await uploadApi.uploadAvatar(file)
     form.value.avatar = res.data.url
     await userApi.updateProfile({ avatar: form.value.avatar })
     ElMessage.success('上传成功')
@@ -72,20 +60,44 @@ const handleUpload = async (e: Event) => {
     input.value = ''
   }
 }
-
+//点击触发保存元素
 const triggerUpload = () => {
   fileInput.value?.click()
 }
+//加载信息
+const fetchProfile=async () => {
+//同上
+  loading.value = true
+  try {
+    const res= await userApi.getProfile()
+    const p = res.data
+    form.value.nickname = p.nickname || ''
+    form.value.email = p.email || ''
+    form.value.avatar = p.avatar || ''
+  } catch {
+    ElMessage.error('加载用户信息失败')
+  } finally {
+    loading.value = false
+  }
+}
+onMounted(async() => {
+    await fetchProfile()
+})
+
 </script>
 
 <template>
+  <!-- 主体 -->
   <div class="profile-page">
+    <!-- title -->
     <h2 class="page-title">个人资料</h2>
-
-    <div v-if="loading" class="state-tip">加载中...</div>
-
+    <!-- tip组件 -->
+    <StateTip v-if="loading" type="loading" />
+    <!-- 用户信息 -->
     <template v-else>
+      <!-- 卡片 -->
       <div class="card">
+        <!-- 四个信息field -->
         <div class="field">
           <label>用户名</label>
           <el-input :model-value="authStore.username" disabled />
@@ -111,7 +123,7 @@ const triggerUpload = () => {
           <input ref="fileInput" type="file" accept="image/*" hidden @change="handleUpload" />
           <img v-if="avatarUrl" :src="avatarUrl" class="avatar-preview" />
         </div>
-
+        <!-- 提交 -->
         <div class="actions">
           <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
         </div>
@@ -124,7 +136,7 @@ const triggerUpload = () => {
 .profile-page {
   max-width: 560px;
   margin: 0 auto;
-  padding: 32px 24px 64px;
+  padding: 32px var(--page-padding-x) 64px;
 }
 
 .page-title {
@@ -164,12 +176,6 @@ const triggerUpload = () => {
   border-top: 1px solid var(--border);
 }
 
-.state-tip {
-  text-align: center;
-  padding: 80px 0;
-  color: var(--text-muted);
-}
-
 .avatar-row {
   display: flex;
   gap: 8px;
@@ -185,5 +191,14 @@ const triggerUpload = () => {
   object-fit: cover;
   margin-top: 8px;
   border: 2px solid var(--border);
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 20px 18px;
+  }
+  .avatar-row {
+    flex-wrap: wrap;
+  }
 }
 </style>

@@ -2,16 +2,23 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { articleApi } from '@/api/handleapi'
-
+import StateTip from '@/components/StateTip.vue'
+import ArticleCard from '@/components/ArticleCard.vue'
+//init
 const router = useRouter()
-
+//var
+const siteName = import.meta.env.VITE_SITE_NAME || 'Danica'
 const articles = ref<any[]>([])
 const loading = ref(false)
-
+//获取最近文章
 const fetchRecent = async () => {
+  //1.开始加载状态
+  //2.调用接口获取数据
+  //3.若2抛出异常则获取空数据
+  //4.关闭加载状态
   loading.value = true
   try {
-    const res: any = await articleApi.getList({ page: 1, limit: 5, keyword: '' })
+    const res = await articleApi.getList({ page: 1, limit: 5, keyword: '' })
     articles.value = res.data.list || []
   } catch {
     articles.value = []
@@ -22,55 +29,42 @@ const fetchRecent = async () => {
 
 const goDetail = (id: number) => router.push(`/articles/${id}`)
 
-onMounted(() => fetchRecent())
+onMounted(() => 
+    fetchRecent()
+)
 </script>
 
 <template>
+  <!-- 主体 -->
   <div class="home">
-    <!-- Banner -->
+    <!-- 标题栏 -->
     <section class="banner">
-      <h1>欢迎来到 Danica</h1>
+      <h1>欢迎来到 {{ siteName }}</h1>
       <p>记录思考，分享知识。每一篇文章都是一次对话。</p>
     </section>
-
-    <!-- 最新文章 -->
+    <!-- 最近文章 -->
     <section class="recent">
       <div class="recent-header">
         <h2>最新文章</h2>
         <router-link to="/articles" class="view-all">查看全部 →</router-link>
       </div>
-
-      <div v-if="loading" class="state-tip">加载中...</div>
-
-      <div v-else-if="articles.length === 0" class="state-tip">
-        <p>暂无文章</p>
-      </div>
-
+      <!-- tip组件 -->
+      <StateTip v-if="loading" type="loading" />
+      <StateTip v-else-if="articles.length === 0" type="empty" message="暂无文章" />
+      <!-- 展示文章 -->
       <div v-else class="article-list">
-        <article
+        <ArticleCard
           v-for="item in articles"
           :key="item.id"
-          class="card"
-          @click="goDetail(item.id)"
-        >
-          <div class="card-body">
-            <h3 class="card-title">{{ item.title }}</h3>
-            <p class="card-summary">
-              {{ item.summary || item.content?.replace(/<[^>]*>/g, '').slice(0, 120) || '暂无摘要' }}
-            </p>
-            <div class="card-meta">
-              <span>{{ item.created_at?.slice(0, 10) }}</span>
-              <span>{{ item.view_count || 0 }} 次阅读</span>
-            </div>
-          </div>
-        </article>
+          :article="item"
+          @click="goDetail"
+        />
       </div>
     </section>
   </div>
 </template>
 
 <style scoped>
-/* Banner */
 .banner {
   text-align: center;
   padding: 64px 24px 48px;
@@ -78,21 +72,20 @@ onMounted(() => fetchRecent())
   color: #fff;
   margin-bottom: 40px;
 }
-.banner h1 {
-  font-size: 32px;
-  margin-bottom: 12px;
-  font-weight: 700;
+.banner h1 { 
+  font-size: 32px; 
+  margin-bottom: 12px; 
+  font-weight: 700; 
 }
-.banner p {
-  font-size: 16px;
-  opacity: 0.9;
+.banner p { 
+  font-size: 16px; 
+  opacity: 0.9; 
 }
 
-/* 最新文章 */
 .recent {
   max-width: 720px;
   margin: 0 auto;
-  padding: 0 24px 64px;
+  padding: 0 var(--page-padding-x) 64px;
 }
 .recent-header {
   display: flex;
@@ -100,67 +93,35 @@ onMounted(() => fetchRecent())
   align-items: baseline;
   margin-bottom: 20px;
 }
-.recent-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
+.recent-header h2 { 
+  font-size: 20px; 
+  font-weight: 600; 
+  color: var(--text); 
 }
-.view-all {
-  font-size: 14px;
-  color: var(--primary);
-  text-decoration: none;
+.view-all { 
+  font-size: 14px; 
+  color: var(--primary); 
+  text-decoration: none; 
 }
-.view-all:hover {
-  text-decoration: underline;
-}
-
-/* 状态 */
-.state-tip {
-  text-align: center;
-  padding: 60px 0;
-  color: var(--text-muted);
+.view-all:hover { 
+  text-decoration: underline; 
 }
 
-/* 卡片列表 */
-.article-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.article-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
 }
-.card {
-  padding: 20px 24px;
-  background: var(--bg-card);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid var(--border);
-}
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--card-shadow);
-  border-color: var(--primary);
-}
-.card-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-.card-summary {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.card-meta {
-  display: flex;
-  gap: 16px;
-  font-size: 13px;
-  color: var(--text-muted);
+
+@media (max-width: 768px) {
+  .banner { 
+    padding: 40px 16px 32px; 
+  }
+  .banner h1 { 
+    font-size: 24px; 
+  }
+  .banner p { 
+    font-size: 14px; 
+  }
 }
 </style>

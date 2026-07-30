@@ -1,48 +1,52 @@
-import { authService } from "@/service/auth";
-import { defineStore } from "pinia";
-import { computed, ref } from "vue";
-const localstorageKey={
-    accesstoken:'accesstoken',
-    refreshtoken:'refreshtoken',
-    user:'user'
+import { authApi } from "@/api/handleapi"
+import { defineStore } from "pinia"
+import { computed, ref } from "vue"
+
+const localstorageKey = {
+  accesstoken: 'accesstoken',
+  refreshtoken: 'refreshtoken',
+  user: 'user',
 }
 
-export const useauthStore=defineStore('userLogin',()=>{
-    const accesstoken=ref(localStorage.getItem(localstorageKey.accesstoken)||'')
-    const refreshtoken=ref(localStorage.getItem(localstorageKey.refreshtoken)||'')
-    const stored = localStorage.getItem(localstorageKey.user)
-    const user = ref(stored ? JSON.parse(stored) : null)
+export const useauthStore = defineStore('userLogin', () => {
+  const accesstoken = ref(localStorage.getItem(localstorageKey.accesstoken) || '')
+  const refreshtoken = ref(localStorage.getItem(localstorageKey.refreshtoken) || '')
+  const stored = localStorage.getItem(localstorageKey.user)
+  const user = ref(stored ? JSON.parse(stored) : null)
 
-    const isLogin=computed(()=>!!accesstoken.value)
-    const userId=computed(()=>user.value?.id||'')
-    const username=computed(()=>user.value?.name||'')
+  const isLogin = computed(() => !!accesstoken.value)
+  const userId = computed(() => user.value?.id || '')
+  const username = computed(() => user.value?.name || '')
 
-    const login=async(username:string,password:string)=>{
-        const result=await authService.login(username,password)
-        accesstoken.value=result.accesstoken
-        refreshtoken.value=result.refreshtoken
-        user.value=result.user
-        localStorage.setItem(localstorageKey.accesstoken,result.accesstoken)
-        localStorage.setItem(localstorageKey.refreshtoken,result.refreshtoken)
-        localStorage.setItem(localstorageKey.user,JSON.stringify(result.user))
+  const login = async (username: string, password: string) => {
+    const res = await authApi.login({ username, password })
+    const data = res.data
+    accesstoken.value = data.accesstoken
+    refreshtoken.value = data.refreshtoken
+    user.value = { id: data.userId, name: data.username }
+    localStorage.setItem(localstorageKey.accesstoken, data.accesstoken)
+    localStorage.setItem(localstorageKey.refreshtoken, data.refreshtoken)
+    localStorage.setItem(localstorageKey.user, JSON.stringify(user.value))
+  }
 
-    }
-    const register=async(username:string,password:string)=>{
-        await authService.register(username,password)
-    }
-    const refresh=async()=>{
-        const result=await authService.refresh(refreshtoken.value)
-        accesstoken.value=result.accesstoken
-        localStorage.setItem(localstorageKey.accesstoken,result.accesstoken)
-    }
-    const logout=async()=>{
-        accesstoken.value=''
-        refreshtoken.value=''
-        user.value=null
-        localStorage.removeItem(localstorageKey.accesstoken)
-        localStorage.removeItem(localstorageKey.refreshtoken)
-        localStorage.removeItem(localstorageKey.user)
-    }
+  const register = async (username: string, password: string) => {
+    await authApi.register({ username, password })
+  }
+
+  const refresh = async () => {
+    const res = await authApi.refresh({ refreshtoken: refreshtoken.value })
+    accesstoken.value = res.data.accesstoken
+    localStorage.setItem(localstorageKey.accesstoken, res.data.accesstoken)
+  }
+
+  const logout = () => {
+    accesstoken.value = ''
+    refreshtoken.value = ''
+    user.value = null
+    localStorage.removeItem(localstorageKey.accesstoken)
+    localStorage.removeItem(localstorageKey.refreshtoken)
+    localStorage.removeItem(localstorageKey.user)
+  }
 
     return {
         // state

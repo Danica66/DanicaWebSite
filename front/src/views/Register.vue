@@ -2,10 +2,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
-
+import AuthCard from '@/components/AuthCard.vue'
+//init
 const router = useRouter()
 const authStore = useauthStore()
-
+//var
 const username = ref('')
 const password = ref('')
 const password2 = ref('')
@@ -14,9 +15,13 @@ const errorMsg = ref('')
 const successMsg = ref('')
 
 const handleRegister = async () => {
+  //1.检查账号密码合法性,不合法写入errorMsg
+  //2.开始加载状态
+  //3.调用store.register传参,写入successMsg,等待1.5秒跳转登陆界面
+  //4.若3抛出异常则写入errorMsg
+  //5.关闭加载状态
   errorMsg.value = ''
   successMsg.value = ''
-
   if (!username.value || !password.value) {
     errorMsg.value = '用户名和密码不能为空'
     return
@@ -29,7 +34,6 @@ const handleRegister = async () => {
     errorMsg.value = '密码至少 5 位'
     return
   }
-
   loading.value = true
   try {
     await authStore.register(username.value, password.value)
@@ -44,68 +48,22 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <div class="box">
-    <h2>注册</h2>
+  <!-- 登录组件 -->
+  <AuthCard title="注册" submit-text="注册" :loading="loading" @submit="handleRegister">
+    <!-- alert插槽 -->
+    <template #alert>
+      <el-alert v-if="errorMsg" :title="errorMsg" type="error" show-icon />
+      <el-alert v-if="successMsg" :title="successMsg" type="success" show-icon />
+    </template>
 
-    <el-alert v-if="errorMsg" :title="errorMsg" type="error" show-icon />
-    <el-alert v-if="successMsg" :title="successMsg" type="success" show-icon />
-
-    <div class="row">
-      <el-input v-model="username" placeholder="请输入用户名" @keyup.enter="handleRegister" />
-    </div>
-
-    <div class="row">
-      <el-input
-        v-model="password"
-        type="password"
-        placeholder="请输入密码（至少6位）"
-        show-password
-        @keyup.enter="handleRegister"
-      />
-    </div>
-
-    <div class="row">
-      <el-input
-        v-model="password2"
-        type="password"
-        placeholder="请再次输入密码"
-        show-password
-        @keyup.enter="handleRegister"
-      />
-    </div>
-
-    <el-button type="primary" :loading="loading" class="btn" @click="handleRegister">
-      {{ loading ? '注册中...' : '注册' }}
-    </el-button>
-
-    <p class="link">
+    <el-input v-model="username" placeholder="请输入用户名" @keyup.enter="handleRegister" />
+    <el-input v-model="password" type="password" placeholder="请输入密码（至少5位）" show-password
+      @keyup.enter="handleRegister" />
+    <el-input v-model="password2" type="password" placeholder="请再次输入密码" show-password
+      @keyup.enter="handleRegister" />
+    <!-- 页脚插槽 -->
+    <template #footer>
       已有账号？<router-link to="/login">去登录</router-link>
-    </p>
-  </div>
+    </template>
+  </AuthCard>
 </template>
-
-<style scoped>
-.box {
-  width: 400px;
-  margin: 100px auto;
-  padding: 40px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.row {
-  margin: 16px 0;
-}
-
-.btn {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.link {
-  margin-top: 16px;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-</style>

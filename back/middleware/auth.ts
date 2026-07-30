@@ -9,6 +9,8 @@ const PUBLIC_ROUTES = [
   { regex: /^\/api\/articles$/,       methods: ['GET'] },
   { regex: /^\/api\/rss$/,            methods: ['GET'] },
   { regex: /^\/api\/articles\/\d+$/, methods: ['GET'] },
+  { regex: /^\/api\/avatars\/.+/,   methods: ['GET'] },
+  { regex: /^\/api\/articles\/\d+\/comments$/, methods: ['GET'] },
 ]
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {

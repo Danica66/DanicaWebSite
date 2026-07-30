@@ -2,24 +2,28 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
-
+import AuthCard from '@/components/AuthCard.vue'
+//init
 const router = useRouter()
 const route = useRoute()
 const authStore = useauthStore()
-
+//var
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
 
 const handleLogin = async () => {
+  //1.检测账号密码合法性,不合法return并写入errorMsg
+  //2.开始加载状态
+  //3.调用store.login传参,检测上次访问路径并跳转或跳转主页
+  //4.3若抛出异常则写入errorMsg
+  //5.关闭加载状态
   errorMsg.value = ''
-
   if (!username.value || !password.value) {
     errorMsg.value = '用户名和密码不能为空'
     return
   }
-
   loading.value = true
   try {
     await authStore.login(username.value, password.value)
@@ -34,57 +38,19 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="box">
-    <h2>登录</h2>
+  <!-- 登录组件 -->
+  <AuthCard title="登录" submit-text="登录" :loading="loading" @submit="handleLogin">
+    <!-- alert插槽 -->
+    <template #alert>
+      <el-alert v-if="errorMsg" :title="errorMsg" type="error" show-icon />
+    </template>
 
-    <el-alert v-if="errorMsg" :title="errorMsg" type="error" show-icon />
-
-    <div class="row">
-      <el-input v-model="username" placeholder="请输入用户名" @keyup.enter="handleLogin" />
-    </div>
-
-    <div class="row">
-      <el-input
-        v-model="password"
-        type="password"
-        placeholder="请输入密码"
-        show-password
-        @keyup.enter="handleLogin"
-      />
-    </div>
-
-    <el-button type="primary" :loading="loading" class="btn" @click="handleLogin">
-      {{ loading ? '登录中...' : '登录' }}
-    </el-button>
-
-    <p class="link">
+    <el-input v-model="username" placeholder="请输入用户名" @keyup.enter="handleLogin" />
+    <el-input v-model="password" type="password" placeholder="请输入密码" show-password
+      @keyup.enter="handleLogin" />
+    <!-- 页脚插槽 -->
+    <template #footer>
       没有账号？<router-link to="/register">去注册</router-link>
-    </p>
-  </div>
+    </template>
+  </AuthCard>
 </template>
-
-<style scoped>
-.box {
-  width: 400px;
-  margin: 100px auto;
-  padding: 40px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.row {
-  margin: 16px 0;
-}
-
-.btn {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.link {
-  margin-top: 16px;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-</style>

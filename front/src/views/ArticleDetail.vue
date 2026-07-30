@@ -4,62 +4,58 @@ import { useRoute, useRouter } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
 import { articleApi } from '@/api/handleapi'
 import DOMPurify from 'dompurify'
-
+import CommentSection from '@/components/CommentSection.vue'
+import StateTip from '@/components/StateTip.vue'
+//init
 const route = useRoute()
 const router = useRouter()
 const authStore = useauthStore()
-
+//var
 const article = ref<any>(null)
 const loading = ref(true)
 const errorMsg = ref('')
 const isAuthor = ref(false)
 const safeHtml = (html: string) => DOMPurify.sanitize(html)
+const articleId = ref(0)
 
+//获取文章
 const fetchArticle = async () => {
   const id = Number(route.params.id)
-  if (!id) {
-    errorMsg.value = '文章 ID 无效'
-    loading.value = false
-    return
+  if (!id) { 
+    errorMsg.value = '文章 ID 无效'; 
+    loading.value = false; 
+    return 
   }
+  articleId.value = id
   loading.value = true
-  errorMsg.value = ''
   try {
-    const res: any = await articleApi.getDetail(id)
+    const res= await articleApi.getDetail(id)
     article.value = res.data
     isAuthor.value = String(authStore.userId) === String(article.value.author_id)
   } catch {
     errorMsg.value = '文章加载失败'
-  } finally {
-    loading.value = false
-  }
+  } finally { loading.value = false }
 }
 
 const goBack = () => router.back()
-const goEdit = () => {
-  router.push(`/articles/${article.value.id}/edit`)
-}
+const goEdit = () => router.push(`/articles/${article.value.id}/edit`)
 
-onMounted(() => {
-  fetchArticle()
-})
+onMounted(fetchArticle)
 </script>
 
 <template>
+  <!-- 主体 -->
   <div class="detail">
-    <!-- 加载中 -->
-    <div v-if="loading" class="state-tip">
-      <p>加载中...</p>
-    </div>
-
-    <!-- 错误 -->
+    <!-- tip组件 -->
+    <StateTip v-if="loading" type="loading" />
+    <!-- 报错返回 -->
     <div v-else-if="errorMsg" class="state-tip">
       <p class="error-text">{{ errorMsg }}</p>
       <el-button class="back-btn" type="primary" plain @click="goBack">返回</el-button>
     </div>
-
-    <!-- 文章内容 -->
+    <!-- 文章展示 -->
     <template v-else-if="article">
+      <!-- 文章标签 -->
       <article class="article">
         <header class="article-header">
           <h1 class="article-title">{{ article.title }}</h1>
@@ -78,13 +74,20 @@ onMounted(() => {
           </div>
         </div>
       </article>
-    </template>
 
-    <!-- 文章不存在 -->
-    <div v-else class="state-tip">
-      <p>文章不存在</p>
-      <el-button class="back-btn" type="primary" plain @click="goBack">返回</el-button>
-    </div>
+      <CommentSection
+        :article-id="articleId"
+        :current-user-id="authStore.userId"
+        :is-login="authStore.isLogin"
+      />
+    </template>
+    <!-- tip组件 -->
+    <StateTip v-else type="empty" message="文章不存在">
+      <!-- 插槽 -->
+      <template #extra>
+        <el-button type="primary" plain @click="goBack">返回</el-button>
+      </template>
+    </StateTip>
   </div>
 </template>
 
@@ -92,23 +95,17 @@ onMounted(() => {
 .detail {
   max-width: 760px;
   margin: 0 auto;
-  padding: 32px 24px 64px;
+  padding: 32px var(--page-padding-x) 120px;
 }
 
-/* 状态提示 */
 .state-tip {
   text-align: center;
   padding: 80px 0;
   color: var(--text-muted);
 }
-.error-text {
-  color: #e6a23c;
-}
-.back-btn {
-  margin-top: 16px;
-}
+.error-text { color: #e6a23c; }
+.back-btn { margin-top: 16px; }
 
-/* 文章 */
 .article-header {
   margin-bottom: 32px;
   padding-bottom: 20px;
@@ -127,7 +124,6 @@ onMounted(() => {
   font-size: 14px;
   color: var(--text-muted);
 }
-
 .article-body {
   font-size: 16px;
   line-height: 2;
@@ -135,7 +131,6 @@ onMounted(() => {
   word-break: break-word;
   margin-bottom: 40px;
 }
-
 .article-footer {
   text-align: center;
   padding-top: 24px;
@@ -145,5 +140,10 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .article-title { font-size: 22px; }
+  .article-body { font-size: 15px; line-height: 1.8; }
 }
 </style>

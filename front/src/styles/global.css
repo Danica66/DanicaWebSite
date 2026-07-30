@@ -11,6 +11,7 @@
   --navbar-bg: #fff;
   --shadow: rgba(0, 0, 0, 0.04);
   --card-shadow: rgba(0, 0, 0, 0.08);
+  --highlight-bg: #fff3cd;
 }
 
 /* 暗色主题 */
@@ -26,6 +27,16 @@ html.dark {
   --navbar-bg: #1e1e32;
   --shadow: rgba(0, 0, 0, 0.2);
   --card-shadow: rgba(0, 0, 0, 0.3);
+  --highlight-bg: #5a4a1a;
+}
+
+/* ===== 响应式间距变量 =====
+   约定断点: 768px（平板/手机分界）
+   页面用 var(--page-padding-x) 替代写死的 padding
+   大屏 = 24px，小屏自动缩为 16px
+*/
+:root {
+  --page-padding-x: 24px;
 }
 
 * {
@@ -40,4 +51,17 @@ body {
   background: var(--bg);
   color: var(--text);
   transition: background 0.3s, color 0.3s;
+}
+
+/* 图片在移动端不超出屏幕 */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===== 移动端 ===== */
+@media (max-width: 768px) {
+  :root {
+    --page-padding-x: 16px;
+  }
 }

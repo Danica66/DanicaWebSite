@@ -5,8 +5,8 @@ import { Article } from '../../type'
 export const insert_article =(article:Article): Promise<RowDataPacket[]>=>{
    return new Promise((resolve, reject) => {
     const status = article.status === 'published' ? 'published' : 'draft'
-    const sql = 'INSERT INTO articles (title, content, summary, author_id, status) VALUES (?, ?, ?, ?, ?)'
-    db.query(sql, [article.title, article.content, article.summary, article.author_id, status], (err, result:RowDataPacket[]) => {
+    const sql = 'INSERT INTO articles (title, content, summary, cover_image, author_id, status) VALUES (?, ?, ?, ?, ?, ?)'
+    db.query(sql, [article.title, article.content, article.summary, article.cover_image, article.author_id, status], (err, result:RowDataPacket[]) => {
       if (err) {
         reject(err)
       } else {
@@ -19,27 +19,40 @@ export const insert_article =(article:Article): Promise<RowDataPacket[]>=>{
 export const select_article =(page:number,limit:number,keyword:string): Promise<RowDataPacket[]>=>{
    return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit
-    const sql = 'SELECT id, title, content, author_id, view_count, created_at FROM articles WHERE status = \'published\' AND (title LIKE ? OR content LIKE ?) ORDER BY created_at DESC LIMIT ? OFFSET ?'
-    db.query(sql, [`%${keyword}%`,`%${keyword}%`,limit,offset], (err, result:RowDataPacket[]) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(result)
-      }
-    })
+    const fields = 'SELECT id, title, summary, cover_image, author_id, view_count, created_at'
+    const where = " FROM articles WHERE status = 'published'"
+    if (keyword) {
+      const sql = fields + where + ' AND MATCH(title, summary) AGAINST(? IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT ? OFFSET ?'
+      db.query(sql, [keyword, limit, offset], (err, result:RowDataPacket[]) => {
+        if (err) reject(err)
+        else resolve(result)
+      })
+    } else {
+      const sql = fields + where + ' ORDER BY created_at DESC LIMIT ? OFFSET ?'
+      db.query(sql, [limit, offset], (err, result:RowDataPacket[]) => {
+        if (err) reject(err)
+        else resolve(result)
+      })
+    }
   })
 }
 // 文章总数（分页用）
 export const select_article_count =(keyword:string): Promise<RowDataPacket[]>=>{
    return new Promise((resolve, reject) => {
-    const sql = 'SELECT COUNT(*) as total FROM articles WHERE status = \'published\' AND (title LIKE ? OR content LIKE ?)'
-    db.query(sql, [`%${keyword}%`,`%${keyword}%`], (err, result:RowDataPacket[]) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(result)
-      }
-    })
+    const where = " FROM articles WHERE status = 'published'"
+    if (keyword) {
+      const sql = 'SELECT COUNT(*) as total' + where + ' AND MATCH(title, summary) AGAINST(? IN BOOLEAN MODE)'
+      db.query(sql, [keyword], (err, result:RowDataPacket[]) => {
+        if (err) reject(err)
+        else resolve(result)
+      })
+    } else {
+      const sql = 'SELECT COUNT(*) as total' + where
+      db.query(sql, (err, result:RowDataPacket[]) => {
+        if (err) reject(err)
+        else resolve(result)
+      })
+    }
   })
 }
 //id查找文章
@@ -72,8 +85,8 @@ export const delete_articlebyid =(id:number): Promise<RowDataPacket[]>=>{
 export const update_article=(article:Article,id:number):Promise<RowDataPacket[]>=>{
   return new Promise((resolve, reject) => {
     const status = article.status === 'published' ? 'published' : 'draft'
-    const sql = 'UPDATE articles SET title = ?, content = ?, status = ? WHERE id = ?'
-    db.query(sql, [article.title, article.content, status, id], (err, result:RowDataPacket[]) => {
+    const sql = 'UPDATE articles SET title = ?, content = ?, summary = ?, cover_image = ?, status = ? WHERE id = ?'
+    db.query(sql, [article.title, article.content, article.summary, article.cover_image, status, id], (err, result:RowDataPacket[]) => {
       if (err) {
         reject(err)
       } else {
@@ -98,7 +111,7 @@ export const update_article_viewcount =(id:number): Promise<RowDataPacket[]>=>{
 // RSS: 获取最近文章（不需要分页，需要摘要）
 export const select_articles_rss =(limit:number = 20): Promise<RowDataPacket[]>=>{
    return new Promise((resolve, reject) => {
-    const sql = 'SELECT id, title, summary, created_at FROM articles WHERE status = \'published\' ORDER BY created_at DESC LIMIT ?'
+    const sql = "SELECT id, title, summary, cover_image, created_at FROM articles WHERE status = 'published' ORDER BY created_at DESC LIMIT ?"
     db.query(sql, [limit], (err, result:RowDataPacket[]) => {
       if (err) {
         reject(err)
@@ -111,7 +124,7 @@ export const select_articles_rss =(limit:number = 20): Promise<RowDataPacket[]>=
 // 查看自己的文章（含草稿）
 export const select_articles_mine =(authorId:number, status?:string): Promise<RowDataPacket[]>=>{
    return new Promise((resolve, reject) => {
-    let sql = 'SELECT id, title, summary, status, view_count, created_at FROM articles WHERE author_id = ?'
+    let sql = 'SELECT id, title, summary, cover_image, status, view_count, created_at FROM articles WHERE author_id = ?'
     const params: any[] = [authorId]
     if (status) {
       sql += ' AND status = ?'
