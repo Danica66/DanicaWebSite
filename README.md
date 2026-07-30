@@ -158,32 +158,30 @@ DanicaWebSite/
 mysql -u root -p < sql/my_website.sql
 ```
 
-### 2. 后端
+### 2. 安装依赖
+
+```bash
+npm run install:all
+```
+
+### 3. 配置后端环境变量
 
 ```bash
 cd back
 cp .env.example .env   # 编辑数据库连接信息
-npm install
-npm run dev             # → http://localhost:3000
 ```
 
-.env 关键变量：
-
-| 变量 | 说明 |
-|------|------|
-| `DB_HOST` / `DB_PORT` / `DB_USERNAME` / `DB_PASSWORD` / `DB_DATABASE` | MySQL 连接 |
-| `JWT_SECRET` / `REFRESH_SECRET` | JWT 签名密钥 |
-| `SITE_URL` / `SITE_TITLE` / `SITE_DESCRIPTION` | RSS 站点信息 |
-
-### 3. 前端
+### 4. 启动（前后端一起）
 
 ```bash
-cd front
-npm install
-npm run dev               # → http://localhost:5173
+npm run dev
+# 后端 → http://localhost:3000
+# 前端 → http://localhost:5173
 ```
 
-前端请求自动代理 `/api` 到 `http://localhost:3000`（Vite proxy）。
+> 通过 [concurrently](https://www.npmjs.com/package/concurrently) 一键启动前后端。
+> 前端 Vite 自动代理 `/api` 请求到后端 `3000` 端口。
+
 
 ---
 

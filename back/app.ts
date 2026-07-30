@@ -31,15 +31,15 @@ app.use('/api/avatars', express.static('public/avatars'))
 // 限流
 app.use('/api', globalLimiter)
 // 登录/注册: 1分钟5次
-app.use('/api/auth', authLimiter, authRoutes)          
+app.use('/api/auth', authLimiter, authRoutes)
  // 公开文章: 15分钟100次
 app.use('/api/articles', publicLimiter, articlesRoutes)
  // 用户信息（需登录）
-app.use('/api/user', userRoutes)  
-// RSS 订阅源（公开）                    
-app.use('/api/rss', rssRoutes)    
-// 文件上传（需登录）                     
-app.use('/api/upload', uploadRoutes)                   
+app.use('/api/user', userRoutes)
+// RSS 订阅源（公开）
+app.use('/api/rss', rssRoutes)
+// 文件上传（需登录）
+app.use('/api/upload', uploadRoutes)
 app.use('/api', commentRoutes)
 
 
@@ -51,5 +51,14 @@ app.use((req, res) => {
 
 //run server
 app.listen(PORT, () => {
-    console.log(`Back server is running at http://localhost:${PORT}`);
-});
+    console.log(`
+  ____              _
+ |  _ \\  __ _ _ __ (_) ___ __ _
+ | | | |/ _\` | '_ \\| |/ __/ _\` |
+ | |_| | (_| | | | | | (_| (_| |
+ |____/ \\__,_|_| |_|_|\\___\\__,_|
+
+    `)
+    console.log(`  back is running at http://localhost:${PORT}`)
+    console.log()
+})

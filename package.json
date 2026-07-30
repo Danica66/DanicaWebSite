@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "install:all": "npm i && cd front && npm install && cd ../back && npm install",
+    "dev": "concurrently --names \"SERVER,CLIENT\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run dev:node\" \"npm run dev:vue\"",
+    "dev:node": "cd back && npm run dev",
+    "dev:vue": "cd front && npm run dev"
+  },
+  "dependencies": {
+    "concurrently": "^10.0.4"
+  }
+}

@@ -45,6 +45,7 @@ const handleLogout = () => {
         </button>
         <div class="nav-links" :class="{ open: menuOpen }">
           <router-link to="/articles" @click="closeMenu">文章</router-link>
+          <a href="/api/rss" class="rss-nav" @click="closeMenu">RSS</a>
           <router-link v-if="authStore.isLogin" to="/mine" @click="closeMenu">我的文章</router-link>
           <router-link v-if="authStore.isLogin" to="/articles/create" @click="closeMenu">写文章</router-link>
 
@@ -132,6 +133,10 @@ const handleLogout = () => {
 }
 .nav-links a:hover {
   color: var(--primary);
+}
+.rss-nav {
+  color: #e6a23c !important;
+  font-weight: 500;
 }
 .theme-btn {
   font-size: 18px;
