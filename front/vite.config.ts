@@ -15,6 +15,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: '0.0.0.0',   // 加这一行，让容器外部能访问
     proxy: {
       '/api': 'http://localhost:3000',
     },

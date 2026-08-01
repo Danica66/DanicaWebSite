@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: danica-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-1234}
+      MYSQL_DATABASE: ${DB_DATABASE:-my_website}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  back:
+    image: danica6/danicaweb_back
+    container_name: danica-back
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_DATABASE=${DB_DATABASE:-my_website}
+      - JWT_SECRET=${JWT_SECRET:-change-me}
+      - REFRESH_SECRET=${REFRESH_SECRET:-change-me-too}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1h}
+      - REFRESH_EXPIRES_IN=${REFRESH_EXPIRES_IN:-7d}
+      - BCRYPT_SALT_ROUNDS=${BCRYPT_SALT_ROUNDS:-10}
+      - SITE_URL=${SITE_URL:-http://localhost}
+      - SITE_TITLE=${SITE_TITLE:-Danica}
+      - SITE_DESCRIPTION=${SITE_DESCRIPTION:-个人博客}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  front:
+    image: danica6/danicaweb_front
+    container_name: danica-front
+    ports:
+      - "80:80"
+    depends_on:
+      - back
+    restart: unless-stopped
+
+volumes:
+  mysql-data:

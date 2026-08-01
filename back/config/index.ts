@@ -1,6 +1,5 @@
 import dotenv from 'dotenv'
 
-
 // 加载 .env 文件
 dotenv.config()
 
@@ -11,12 +10,12 @@ export const config = {
     env: process.env.NODE_ENV || '',
   },
 
-  // JWT 
+  // JWT
   Cjwt: {
     secret: process.env.JWT_SECRET || '',
     refreshSecret: process.env.REFRESH_SECRET || '',
-    expiresIn: '1h' as const,
-    refreshExpiresIn: '1d' as const,
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+    refreshExpiresIn: process.env.REFRESH_EXPIRES_IN || '7d',
   },
   //bcrypt
   Cbcrypt: {
@@ -43,7 +42,13 @@ export const config = {
     title: process.env.SITE_TITLE || '',
     description: process.env.SITE_DESCRIPTION || '',
   },
+
+  // CORS
+  CallowedOrigins: (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((s: string) => s.trim())
+    .filter(Boolean),
 }
 
 // 导出常用配置（方便使用）
-export const { Cserver, Cjwt, Cdatabase, Cbcrypt, Csite } = config
+export const { Cserver, Cjwt, Cdatabase, Cbcrypt, Csite, CallowedOrigins } = config

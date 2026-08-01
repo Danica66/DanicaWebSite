@@ -1,7 +1,6 @@
 //import
 import express from "express";
 import cors from "cors";
-import dotenv from 'dotenv'//把敏感信息（密码、密钥、API Key）放在 .env 文件里，而不是写在代码中
 import authRoutes from './routes/auth'
 import articlesRoutes from './routes/articles'
 import userRoutes from './routes/user'
@@ -9,7 +8,7 @@ import rssRoutes from './routes/rss'
 import uploadRoutes from './routes/upload'
 import commentRoutes from './routes/comment'
 import { authMiddleware , responseWrapper } from './middleware'
-import { Cserver } from './config/index'
+import { Cserver, CallowedOrigins } from './config/index'
 import { authLimiter, publicLimiter, globalLimiter } from './middleware/rateLimit'
 
 
@@ -17,14 +16,15 @@ import { authLimiter, publicLimiter, globalLimiter } from './middleware/rateLimi
 const app = express();
 const PORT = Cserver.port
 
-dotenv.config()
-
 //middleware
-app.use(cors());// 允许跨域请求
-app.use(express.json());// 解析 JSON 请求体
-app.use(express.urlencoded({ extended: true }));// 解析 URL 编码的请求体
-app.use(responseWrapper);// 统一响应格式中间件
-app.use(authMiddleware)//全局鉴权token
+app.use(cors({
+  origin: CallowedOrigins || '*',
+  credentials: true,
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(responseWrapper);
+app.use(authMiddleware)
 
 // 静态文件
 app.use('/api/avatars', express.static('public/avatars'))
@@ -43,7 +43,6 @@ app.use('/api/upload', uploadRoutes)
 app.use('/api', commentRoutes)
 
 
-
 // 404
 app.use((req, res) => {
   res.notFound('接口不存在')
@@ -59,6 +58,6 @@ app.listen(PORT, () => {
  |____/ \\__,_|_| |_|_|\\___\\__,_|
 
     `)
-    console.log(`  back is running at http://localhost:${PORT}`)
+    console.log(`  Danica is running at http://localhost:${PORT}`)
     console.log()
 })
