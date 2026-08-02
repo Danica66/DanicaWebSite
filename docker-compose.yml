@@ -19,6 +19,7 @@ services:
 
   back:
     image: danica6/danicaweb_back
+    build: ./back
     container_name: danica-back
     ports:
       - "3000:3000"
@@ -46,6 +47,7 @@ services:
 
   front:
     image: danica6/danicaweb_front
+    build: ./front
     container_name: danica-front
     ports:
       - "80:80"

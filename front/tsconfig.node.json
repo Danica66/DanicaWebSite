@@ -1,5 +1,4 @@
 {
-  "extends": "@tsconfig/node24/tsconfig.json",
   "include": [
     "vite.config.*",
     "vitest.config.*",
@@ -9,12 +8,15 @@
     "eslint.config.*"
   ],
   "compilerOptions": {
-    "noEmit": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-
+    "target": "es2024",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["node"],
-    "resolvePackageJsonExports": false
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "lib": ["es2024"],
+    "types": ["node"]
   }
 }

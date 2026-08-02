@@ -9,7 +9,7 @@ function escapeHtml(str: string): string {
     '"': '&quot;',
     "'": '&#39;',
   }
-  return str.replace(/[&<>"']/g, c => map[c])
+  return str.replace(/[&<>"']/g, c => map[c]!)
 }
 
 /** 转义正则特殊字符 */
@@ -22,7 +22,7 @@ function escapeRegex(str: string): string {
  * @param text    原始文本
  * @param keyword 搜索关键词，为空时仅转义后返回
  */
-export function highlightText(text: string, keyword: string): string {
+export function highlightText(text: string, keyword?: string): string {
   if (!keyword) return escapeHtml(text)
   const escaped = escapeHtml(text)
   const escapedKw = escapeRegex(escapeHtml(keyword))

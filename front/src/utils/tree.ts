@@ -9,8 +9,9 @@ export function buildTree<T extends { id: number; parent_id: number | null; chil
   const roots: T[] = []
   list.forEach(item => { item.children = []; map[item.id] = item })
   list.forEach(item => {
-    if (item.parent_id && map[item.parent_id]) {
-      map[item.parent_id].children!.push(item)
+    const parent = item.parent_id ? map[item.parent_id] : undefined
+    if (parent) {
+      parent.children!.push(item)
     } else {
       roots.push(item)
     }

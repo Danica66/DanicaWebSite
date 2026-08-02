@@ -18,7 +18,14 @@ RUN npm run build-only
 # 第二阶段：运行
 FROM nginx:alpine
 
+RUN rm -rf /usr/share/nginx/html/*
+RUN apk add --no-cache wget
+
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
+
+ENTRYPOINT ["/entrypoint.sh"]

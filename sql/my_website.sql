@@ -13,7 +13,8 @@
 
  Date: 29/07/2026 11:42:37
 */
-
+CREATE DATABASE IF NOT EXISTS my_website;
+USE my_website;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
