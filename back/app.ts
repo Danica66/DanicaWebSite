@@ -58,6 +58,4 @@ app.listen(PORT, () => {
  |____/ \\__,_|_| |_|_|\\___\\__,_|
 
     `)
-    console.log(`  Danica is running at http://localhost:${PORT}`)
-    console.log()
 })

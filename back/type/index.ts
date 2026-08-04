@@ -23,12 +23,10 @@ export interface UserPayload {
 //login
 export interface UserLogin {
   username: string
-  nickname?: string
   email?: string
   password: string
 }
 export interface UserProfile {
-  nickname?: string
   email?: string
   avatar?: string
 }

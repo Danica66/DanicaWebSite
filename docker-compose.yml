@@ -39,7 +39,17 @@ services:
       - SITE_URL=${SITE_URL:-http://localhost}
       - SITE_TITLE=${SITE_TITLE:-Danica}
       - SITE_DESCRIPTION=${SITE_DESCRIPTION:-个人博客}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - MAIL_FROM=${MAIL_FROM:-Danica <noreply@resend.dev>}
+      - MAIL_CODE_EXPIRES_IN=${MAIL_CODE_EXPIRES_IN:-300}
+      - MAIL_RESEND_INTERVAL=${MAIL_RESEND_INTERVAL:-60}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/rss').then(r => r.ok?process.exit(0):process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     depends_on:
       db:
         condition: service_healthy
@@ -51,6 +61,17 @@ services:
     container_name: danica-front
     ports:
       - "80:80"
+    depends_on:
+      - back
+    restart: unless-stopped
+
+  manager:
+    image: danica6/danicaweb_front_manager
+    build: ./front-manager
+    container_name: danica-manager
+    profiles: ["admin"]
+    ports:
+      - "8080:80"
     depends_on:
       - back
     restart: unless-stopped

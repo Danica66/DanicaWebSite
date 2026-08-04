@@ -78,9 +78,10 @@ CREATE TABLE `users`  (
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `email_verified` tinyint(1) NULL DEFAULT 0,
+  `is_admin` tinyint(1) NULL DEFAULT 0,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `avatar` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username` ASC) USING BTREE,
@@ -88,9 +89,24 @@ CREATE TABLE `users`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Table structure for email_codes
+-- ----------------------------
+DROP TABLE IF EXISTS `email_codes`;
+CREATE TABLE `email_codes`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `code` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `expires_at` timestamp NOT NULL,
+  `attempts` int NULL DEFAULT 0,
+  `used` tinyint(1) NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_email`(`email` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (4, 'danica', '$2b$10$Ii9o1S2iTgd..FnGmUOauOmVmmwDuhAu0tfFuw8KVoOQVOCZmiduy', NULL, '2026-07-24 16:30:24', '2026-07-29 10:33:22', NULL, '/api/avatars/7ff84f917fa8a12dec889eac.jpg');
-INSERT INTO `users` VALUES (8, 'danica1', '$2b$10$2pbbqZ7KXTLfzgvBBlAafeAPS5RsiGzREg6q1ezzzG9HW5U6hpJDy', NULL, '2026-07-29 10:35:54', '2026-07-29 10:35:54', NULL, NULL);
+INSERT INTO `users` VALUES (4, 'danica', '$2b$10$Ii9o1S2iTgd..FnGmUOauOmVmmwDuhAu0tfFuw8KVoOQVOCZmiduy', NULL, 0, '2026-07-24 16:30:24', '2026-07-29 10:33:22', NULL, '/api/avatars/7ff84f917fa8a12dec889eac.jpg');
 
 SET FOREIGN_KEY_CHECKS = 1;

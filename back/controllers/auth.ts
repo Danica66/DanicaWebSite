@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { UserLogin } from '../type/index'
-import { loginService, refreshService, registerService, getProfileService, updateProfileService } from '../service/auth'
+import { loginService, refreshService, registerService, getProfileService, updateProfileService, sendCodeService } from '../service/auth'
 
 
 export const loginController = async (req: Request, res: Response) => {
@@ -12,14 +12,32 @@ export const loginController = async (req: Request, res: Response) => {
     }
     try {
         return res.success(await loginService(body), '登录成功')
-    } catch (err) {
+    } catch (err: any) {
         console.error('登录失败:', err)
-        if (err?.message) {
+        if (err.message) {
             return res.badRequest(err.message)
         }
         return res.internalError('登录失败，请稍后重试')
     }
 }
+
+// 发送注册验证码
+export const sendCodeController = async (req: Request, res: Response) => {
+    const { email } = req.body
+    if(!email){
+        return res.badRequest('邮箱不能为空')
+    }
+    try {
+        return res.success(await sendCodeService(email), '验证码已发送')
+    } catch (err: any) {
+        console.error('发送验证码失败:', err)
+        if (err.message) {
+            return res.badRequest(err.message)
+        }
+        return res.internalError('发送验证码失败，请稍后重试')
+    }
+}
+
 export const registerController = async(req: Request, res: Response) => {
     const body: UserLogin = req.body;
     const username=body.username
@@ -27,11 +45,14 @@ export const registerController = async(req: Request, res: Response) => {
     if (!username || !password) {
         return res.badRequest('用户名和密码不能为空')
     }
+    if(!body.email || !req.body.code){
+        return res.badRequest('邮箱和验证码不能为空')
+    }
     try {
-        return res.success(await registerService(body), '注册成功')
-    } catch (err) {
+        return res.success(await registerService(body, req.body.code), '注册成功')
+    } catch (err: any) {
         console.error('注册失败:', err)
-        if (err?.message === '用户名已存在') {
+        if (err.message) {
             return res.badRequest(err.message)
         }
         return res.internalError('注册失败，请稍后重试')
@@ -60,9 +81,9 @@ export const getProfileController=async(req:Request,res:Response)=>{
     }
 }
 export const updateProfileController=async(req:Request,res:Response)=>{
-    const {nickname,email,avatar}=req.body
+    const {email,avatar}=req.body
     try {
-        await updateProfileService(req.user.userId,{nickname,email,avatar})
+        await updateProfileService(req.user.userId,{email,avatar})
         return res.success(null,'更新用户信息成功')
     } catch (err) {
         console.error('更新用户信息失败:', err)

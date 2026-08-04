@@ -1,0 +1,67 @@
+/* 亮色主题（默认） */
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #fff;
+  --text: #333;
+  --text-secondary: #777;
+  --text-muted: #bbb;
+  --border: #eee;
+  --primary: #409eff;
+  --primary-light: #6fb3f8;
+  --navbar-bg: #fff;
+  --shadow: rgba(0, 0, 0, 0.04);
+  --card-shadow: rgba(0, 0, 0, 0.08);
+  --highlight-bg: #fff3cd;
+}
+
+/* 暗色主题 */
+html.dark {
+  --bg: #1a1a2e;
+  --bg-card: #252540;
+  --text: #e0e0e0;
+  --text-secondary: #aaa;
+  --text-muted: #666;
+  --border: #333;
+  --primary: #6fb3f8;
+  --primary-light: #409eff;
+  --navbar-bg: #1e1e32;
+  --shadow: rgba(0, 0, 0, 0.2);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --highlight-bg: #5a4a1a;
+}
+
+/* ===== 响应式间距变量 =====
+   约定断点: 768px（平板/手机分界）
+   页面用 var(--page-padding-x) 替代写死的 padding
+   大屏 = 24px，小屏自动缩为 16px
+*/
+:root {
+  --page-padding-x: 24px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* 图片在移动端不超出屏幕 */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===== 移动端 ===== */
+@media (max-width: 768px) {
+  :root {
+    --page-padding-x: 16px;
+  }
+}

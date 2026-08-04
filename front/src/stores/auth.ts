@@ -29,8 +29,14 @@ export const useauthStore = defineStore('userLogin', () => {
     localStorage.setItem(localstorageKey.user, JSON.stringify(user.value))
   }
 
-  const register = async (username: string, password: string) => {
-    await authApi.register({ username, password })
+  const register = async (username: string, password: string, email: string, code: string) => {
+    await authApi.register({ username, password, email, code })
+    // 注册成功自动登录
+    await login(username, password)
+  }
+
+  const sendCode = async (email: string) => {
+    await authApi.sendCode({ email })
   }
 
   const refresh = async () => {
@@ -48,20 +54,9 @@ export const useauthStore = defineStore('userLogin', () => {
     localStorage.removeItem(localstorageKey.user)
   }
 
-    return {
-        // state
-        accesstoken,
-        refreshtoken,
-        user,
-        // getters
-        isLogin,
-        userId,
-        username,
-        // actions
-        login,
-        register,
-        refresh,
-        logout,
-    };
-
+  return {
+    accesstoken, refreshtoken, user,
+    isLogin, userId, username,
+    login, register, sendCode, refresh, logout,
+  }
 })

@@ -48,7 +48,15 @@ export const config = {
     .split(',')
     .map((s: string) => s.trim())
     .filter(Boolean),
+
+  // Resend 邮件
+  Cmail: {
+    apiKey: process.env.RESEND_API_KEY || '',
+    from: process.env.MAIL_FROM || '',
+    codeExpiresIn: parseInt(process.env.MAIL_CODE_EXPIRES_IN || '300'), // 秒
+    resendInterval: parseInt(process.env.MAIL_RESEND_INTERVAL || '60'), // 秒
+  },
 }
 
 // 导出常用配置（方便使用）
-export const { Cserver, Cjwt, Cdatabase, Cbcrypt, Csite, CallowedOrigins } = config
+export const { Cserver, Cjwt, Cdatabase, Cbcrypt, Csite, CallowedOrigins, Cmail } = config

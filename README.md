@@ -14,6 +14,7 @@
 | 数据库 | MySQL 8.0（`mysql2` 连接池，原生 SQL） |
 | 身份认证 | JWT（accessToken 1天 + refreshToken 7天） |
 | 密码加密 | bcryptjs（10 轮） |
+| 邮件服务 | Resend |
 | 限流 | express-rate-limit（分级） |
 | 前端框架 | Vue 3（Composition API + `<script setup>`） |
 | 状态管理 | Pinia |
@@ -40,7 +41,8 @@ DanicaWebSite/
 │   │   └── DAO/
 │   │       ├── auth.ts           # 用户数据访问
 │   │       ├── article.ts        # 文章数据访问
-│   │       └── comment.ts        # 评论数据访问
+│   │       ├── comment.ts        # 评论数据访问
+│   │       └── emailCode.ts      # 邮箱验证码数据访问
 │   ├── service/
 │   │   ├── auth.ts               # 认证业务逻辑
 │   │   ├── article.ts            # 文章业务逻辑
@@ -61,6 +63,7 @@ DanicaWebSite/
 │   └── utils/
 │       ├── jwt.ts                # JWT 签发/验证
 │       ├── bcrypt.ts             # 密码哈希
+│       ├── mailer.ts             # Resend 邮件发送
 │       ├── response.ts           # JSON 响应工具
 │       └── rateLimit.ts          # 限流器工厂
 │
@@ -110,10 +113,22 @@ DanicaWebSite/
 | username | varchar(50) UNIQUE | 用户名 |
 | password | varchar(255) | bcrypt 哈希 |
 | email | varchar(100) UNIQUE | 邮箱 |
-| nickname | varchar(50) | 昵称 |
+| email_verified | tinyint(1) | 是否已验证 |
 | avatar | varchar(500) | 头像路径 |
 | created_at | timestamp | |
 | updated_at | timestamp | ON UPDATE |
+
+**email_codes** — 邮箱验证码
+
+| 列 | 类型 | 说明 |
+|----|------|------|
+| id | int PK | 自增 |
+| email | varchar(100) | 邮箱 |
+| code | varchar(6) | 6 位验证码 |
+| expires_at | timestamp | 过期时间 |
+| attempts | int DEFAULT 0 | 尝试次数 |
+| used | tinyint(1) DEFAULT 0 | 是否已使用 |
+| created_at | timestamp | |
 
 **articles** — 文章
 
@@ -187,7 +202,7 @@ npm run dev
 
 ## 功能清单
 
-- [x] 用户注册 / 登录 / 资料编辑
+- [x] 用户注册（邮箱验证码）/ 登录 / 资料编辑
 - [x] JWT 双 Token 鉴权 + 自动刷新
 - [x] 文章 CRUD（草稿 / 发布状态）
 - [x] 文章搜索（MySQL FULLTEXT + 前端关键词高亮）
@@ -198,6 +213,4 @@ npm run dev
 - [x] 响应式布局（桌面 + 移动端）
 - [x] API 分级限流
 - [ ] 文章标签系统
-- [ ] 文章点赞/收藏
 - [ ] 通知系统
-- [ ] AI 流式聊天

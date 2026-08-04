@@ -6,6 +6,7 @@ const PUBLIC_ROUTES = [
   { regex: /^\/api\/auth\/login$/,    methods: ['POST'] },
   { regex: /^\/api\/auth\/register$/, methods: ['POST'] },
   { regex: /^\/api\/auth\/refresh$/,  methods: ['POST'] },
+  { regex: /^\/api\/auth\/send-code$/, methods: ['POST'] },
   { regex: /^\/api\/articles$/,       methods: ['GET'] },
   { regex: /^\/api\/rss$/,            methods: ['GET'] },
   { regex: /^\/api\/articles\/\d+$/, methods: ['GET'] },

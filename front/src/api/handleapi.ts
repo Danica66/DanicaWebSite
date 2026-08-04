@@ -1,14 +1,17 @@
 import api from "@/api"
 export const authApi={
     login(data: { username: string; password: string }) {
-    return api.Post('/auth/login', data);
+        return api.Post('/auth/login', data);
     },
-    register(data: { username: string; password: string }) {
+    register(data: { username: string; password: string; email: string; code: string }) {
         return api.Post('/auth/register', data);
+    },
+    sendCode(data: { email: string }) {
+        return api.Post('/auth/send-code', data);
     },
     refresh(data: { refreshtoken: string }) {
         return api.Post('/auth/refresh', data);
-  },
+    },
 }
 
 export const articleApi = {
@@ -36,7 +39,7 @@ export const userApi = {
   getProfile() {
     return api.Get('/user/profile')
   },
-  updateProfile(data: { nickname?: string; email?: string; avatar?: string }) {
+  updateProfile(data: { email?: string; avatar?: string }) {
     return api.Put('/user/profile', data)
   },
 }

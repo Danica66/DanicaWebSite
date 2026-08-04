@@ -46,8 +46,6 @@ const handleLogout = () => {
         <div class="nav-links" :class="{ open: menuOpen }">
           <router-link to="/articles" @click="closeMenu">文章</router-link>
           <a href="/api/rss" class="rss-nav" @click="closeMenu">RSS</a>
-          <router-link v-if="authStore.isLogin" to="/mine" @click="closeMenu">我的文章</router-link>
-          <router-link v-if="authStore.isLogin" to="/articles/create" @click="closeMenu">写文章</router-link>
 
           <span class="theme-btn" @click="toggleDark">
             {{ isDark ? '☀️' : '🌙' }}

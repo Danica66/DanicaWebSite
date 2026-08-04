@@ -13,11 +13,30 @@
 
 ## 认证
 
-| 方法 | 路径 | 鉴权 | 限流 | 说明 |
-|------|------|------|------|------|
-| POST | `/auth/login` | 否 | 5次/分 | 登录，返回 `accesstoken` + `refreshtoken` + `user` |
-| POST | `/auth/register` | 否 | 5次/分 | 注册，返回 `accesstoken` + `refreshtoken` + `user` |
-| POST | `/auth/refresh` | 否 | — | 刷新 `accesstoken` |
+| 方法 | 路径 | 鉴权 | 说明 |
+|------|------|------|------|
+| POST | `/auth/login` | 否 | 登录，返回 token + 用户信息 |
+| POST | `/auth/register` | 否 | 注册（需先获取邮箱验证码） |
+| POST | `/auth/send-code` | 否 | 发送邮箱验证码，60s 冷却 |
+| POST | `/auth/refresh` | 否 | 刷新 accesstoken |
+
+### POST /auth/send-code
+
+```json
+{ "email": "user@example.com" }
+```
+
+### POST /auth/register
+
+```json
+{
+  "username": "用户名",
+  "password": "密码",
+  "email": "user@example.com",
+  "code": "123456"
+}
+```
+注册成功返回 `{username}`，前端自动调 login 获取 token 并跳转首页。
 
 ---
 
@@ -136,13 +155,12 @@
 | 方法 | 路径 | 鉴权 | 说明 |
 |------|------|------|------|
 | GET | `/user/profile` | 是 | 获取当前用户资料 |
-| PUT | `/user/profile` | 是 | 更新昵称 / 邮箱 / 头像 |
+| PUT | `/user/profile` | 是 | 更新邮箱 / 头像 |
 
 ### PUT /user/profile 请求体
 
 ```json
 {
-  "nickname": "昵称",
   "email": "your@email.com",
   "avatar": "/api/avatars/xxx.jpg"
 }
