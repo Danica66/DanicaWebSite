@@ -1,44 +1,53 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { computed } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { userApi } from '@/api/handleapi'
 import { uploadApi } from '@/api/handleapi'
+import { getErrMsg } from '@/utils/error'
 import { useauthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
 import StateTip from '@/components/StateTip.vue'
-//init
+import SendCodeField from '@/components/SendCodeField.vue'
+
 const authStore = useauthStore()
-//var
+
 const loading = ref(true)
 const saving = ref(false)
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
-//创建信息格式
-const form = ref({
+const originalEmail = ref('')
+
+const form = reactive({
   email: '',
   avatar: '',
 })
-//去掉api前缀,否则图片无法加载
+
+const veriCode = ref('')
+
+const emailChanged = computed(() => form.email !== originalEmail.value)
+
 const apiBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '') || ''
-const avatarUrl = computed(() => {
-  return form.value.avatar ? apiBase + form.value.avatar : ''
-})
-//保存
+const avatarUrl = computed(() => form.avatar ? apiBase + form.avatar : '')
+
 const handleSave = async () => {
   saving.value = true
   try {
-    await userApi.updateProfile({
-      email: form.value.email,
-      avatar: form.value.avatar,
-    })
+    const payload: { email?: string; avatar?: string; code?: string } = { avatar: form.avatar }
+    if (emailChanged.value) {
+      if (!veriCode.value) { ElMessage.warning('修改邮箱需要输入验证码'); saving.value = false; return }
+      payload.email = form.email
+      payload.code = veriCode.value
+    }
+    await userApi.updateProfile(payload)
     ElMessage.success('保存成功')
-  } catch {
-    ElMessage.error('保存失败')
+    originalEmail.value = form.email
+    veriCode.value = ''
+  } catch (err: any) {
+    ElMessage.error(getErrMsg(err, '保存失败'))
   } finally {
     saving.value = false
   }
 }
-//上传
+
 const handleUpload = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -46,8 +55,8 @@ const handleUpload = async (e: Event) => {
   uploading.value = true
   try {
     const res= await uploadApi.uploadAvatar(file)
-    form.value.avatar = res.data.url
-    await userApi.updateProfile({ avatar: form.value.avatar })
+    form.avatar = res.data.url
+    await userApi.updateProfile({ avatar: form.avatar })
     ElMessage.success('上传成功')
   } catch {
     ElMessage.error('上传失败')
@@ -56,40 +65,32 @@ const handleUpload = async (e: Event) => {
     input.value = ''
   }
 }
-//点击触发保存元素
-const triggerUpload = () => {
-  fileInput.value?.click()
-}
-//加载信息
-const fetchProfile=async () => {
+
+const triggerUpload = () => fileInput.value?.click()
+
+const fetchProfile = async () => {
   loading.value = true
   try {
-    const res= await userApi.getProfile()
+    const res = await userApi.getProfile()
     const p = res.data
-    form.value.email = p.email || ''
-    form.value.avatar = p.avatar || ''
+    originalEmail.value = p.email || ''
+    form.email = p.email || ''
+    form.avatar = p.avatar || ''
   } catch {
     ElMessage.error('加载用户信息失败')
   } finally {
     loading.value = false
   }
 }
-onMounted(async() => {
-    await fetchProfile()
-})
 
+onMounted(fetchProfile)
 </script>
 
 <template>
-  <!-- 主体 -->
   <div class="profile-page">
-    <!-- title -->
     <h2 class="page-title">个人资料</h2>
-    <!-- tip组件 -->
     <StateTip v-if="loading" type="loading" />
-    <!-- 用户信息 -->
     <template v-else>
-      <!-- 卡片 -->
       <div class="card">
         <div class="field">
           <label>用户名</label>
@@ -99,7 +100,12 @@ onMounted(async() => {
 
         <div class="field">
           <label>邮箱</label>
-          <el-input v-model="form.email" placeholder="your@email.com" maxlength="100" clearable />
+          <SendCodeField
+            v-model:email="form.email"
+            v-model:code="veriCode"
+            :send-code-fn="userApi.sendCode"
+          />
+          <span v-if="!emailChanged" class="hint">修改邮箱需要验证码</span>
         </div>
 
         <div class="field">
@@ -111,7 +117,7 @@ onMounted(async() => {
           <input ref="fileInput" type="file" accept="image/*" hidden @change="handleUpload" />
           <img v-if="avatarUrl" :src="avatarUrl" class="avatar-preview" />
         </div>
-        <!-- 提交 -->
+
         <div class="actions">
           <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
         </div>

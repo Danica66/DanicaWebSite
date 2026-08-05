@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { commentApi } from '@/api/handleapi'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { buildTree } from '@/utils/tree'
+import { getErrMsg } from '@/utils/error'
 import StateTip from '@/components/StateTip.vue'
 import CommentItem from '@/components/CommentItem.vue'
 
@@ -56,7 +57,7 @@ const handleSubmit = async () => {
     replyTarget.value = null
     fetchComments()
   } catch (err: any) {
-    ElMessage.error(err.response?.data?.message || '评论失败')
+    ElMessage.error(getErrMsg(err, '评论失败'))
   } finally {
     submitLoading.value = false
   }
@@ -73,7 +74,7 @@ const handleDelete = async (commentId: number) => {
     ElMessage.success('已删除')
     fetchComments()
   } catch (err: any) {
-    ElMessage.error(err.response?.data?.message || '删除失败')
+    ElMessage.error(getErrMsg(err, '删除失败'))
   }
 }
 

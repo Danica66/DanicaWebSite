@@ -31,35 +31,34 @@ export const loginService=async (body:UserLogin)=>{
   }
 }
 
-// 发送注册验证码
-export const sendCodeService=async (email:string)=>{
-    if(!EMAIL_REGEX.test(email)){
+// 发送验证码（注册 / 换邮箱公用）
+export const sendCodeService = async (email: string, opts?: { skipDuplicateCheck?: boolean }) => {
+    if (!EMAIL_REGEX.test(email)) {
         throw new Error('邮箱格式不正确')
     }
-    // 邮箱已被注册 → 提示用户直接登录
-    const existed = await select_user_by_email(email)
-    if(existed.length > 0){
-        throw new Error('该邮箱已被注册，请直接登录')
+    // 注册场景：检查邮箱是否已被注册
+    if (!opts?.skipDuplicateCheck) {
+        const existed = await select_user_by_email(email)
+        if (existed.length > 0) {
+            throw new Error('该邮箱已被注册，请直接登录')
+        }
     }
-    // 60 秒冷却：查最近一条记录
+    // 60 秒冷却
     const latest = await select_latest_email_code(email)
-    if(latest.length > 0){
+    if (latest.length > 0) {
         const lastCreated = new Date(latest[0].created_at).getTime()
         const waitMs = Cmail.resendInterval * 1000 - (Date.now() - lastCreated)
-        if(waitMs > 0){
+        if (waitMs > 0) {
             throw new Error(`发送过于频繁，请 ${Math.ceil(waitMs / 1000)} 秒后再试`)
         }
     }
-    // 清理该邮箱的旧验证码，保持一人一码
     await clear_email_codes(email)
-    // 生成 6 位验证码
     const code = crypto.randomInt(100000, 1000000).toString()
     const expiresAt = new Date(Date.now() + Cmail.codeExpiresIn * 1000)
     const inserted = await insert_email_code(email, code, expiresAt)
     try {
         await sendCodeMail(email, code)
     } catch (err) {
-        // 发送失败：清理刚插入的记录，避免残留触发冷却
         await delete_email_code(inserted.insertId)
         console.error('邮件发送失败:', err)
         throw new Error('邮件发送失败，请检查 SMTP 配置')
@@ -132,6 +131,16 @@ export const getProfileService=async(userId:number)=>{
     const {password,...profile}=rows[0]
     return profile
 }
-export const updateProfileService=async(userId:number,profile:UserProfile)=>{
+export const updateProfileService=async(userId:number,profile:UserProfile,code?:string)=>{
+    // 修改邮箱 → 必须提供验证码
+    if(profile.email !== undefined){
+        if(!code) throw new Error('修改邮箱需要验证码')
+        // 检查新邮箱是否已被别人使用
+        const existed = await select_user_by_email(profile.email)
+        if(existed.length > 0 && existed[0].id !== userId){
+            throw new Error('该邮箱已被注册')
+        }
+        await verifyCode(profile.email, code)
+    }
     return await update_user(userId,profile)
 }

@@ -9,7 +9,7 @@ import uploadRoutes from './routes/upload'
 import commentRoutes from './routes/comment'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver, CallowedOrigins } from './config/index'
-import { authLimiter, publicLimiter, globalLimiter } from './middleware/rateLimit'
+import { authLimiter, publicLimiter, globalLimiter, commentLimiter } from './middleware/rateLimit'
 
 
 //init
@@ -18,8 +18,8 @@ const PORT = Cserver.port
 
 //middleware
 app.use(cors({
-  origin: CallowedOrigins || '*',
-  credentials: true,
+  origin: CallowedOrigins.length ? CallowedOrigins : '*',
+  credentials: CallowedOrigins.length ? true : false,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -40,7 +40,7 @@ app.use('/api/user', userRoutes)
 app.use('/api/rss', rssRoutes)
 // 文件上传（需登录）
 app.use('/api/upload', uploadRoutes)
-app.use('/api', commentRoutes)
+app.use('/api', commentLimiter, commentRoutes)
 
 
 // 404

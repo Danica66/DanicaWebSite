@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { getErrMsg } from '@/utils/error'
 import { useRouter, useRoute } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
 import AuthCard from '@/components/AuthCard.vue'
@@ -30,7 +31,7 @@ const handleLogin = async () => {
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.message || '登录失败'
+    errorMsg.value = getErrMsg(err, '登录失败')
   } finally {
     loading.value = false
   }

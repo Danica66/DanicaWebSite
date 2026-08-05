@@ -6,7 +6,6 @@
     "dev:vue": "cd front && npm run dev"
   },
   "dependencies": {
-    "concurrently": "^10.0.4",
-    "resend": "^6.18.1"
+    "concurrently": "^10.0.4"
   }
 }

@@ -74,7 +74,3 @@ export const update_user =(id: number, profile: UserProfile): Promise<RowDataPac
     })
   })
 }
-export default {
-    select_username,
-    insert_username_password
-}

@@ -21,26 +21,17 @@ export const articleApi = {
   getDetail(id: number) {
     return api.Get(`/articles/${id}`);
   },
-  create(data: { title: string; content: string; summary?: string }) {
-    return api.Post('/articles', data);
-  },
-  update(id: number, data: { title?: string; content?: string; summary?: string }) {
-    return api.Put(`/articles/${id}`, data);
-  },
-  delete(id: number) {
-    return api.Delete(`/articles/${id}`);
-  },
-  getMine(params: { page: number; limit: number; status?: string }) {
-    return api.Get('/articles/mine', params);
-  },
 }
 
 export const userApi = {
   getProfile() {
     return api.Get('/user/profile')
   },
-  updateProfile(data: { email?: string; avatar?: string }) {
+  updateProfile(data: { email?: string; avatar?: string; code?: string }) {
     return api.Put('/user/profile', data)
+  },
+  sendCode(email: string) {
+    return api.Post('/user/send-code', { email })
   },
 }
 
