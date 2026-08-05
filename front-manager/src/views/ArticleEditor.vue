@@ -73,7 +73,7 @@ const handleSubmit = async (status: 'published' | 'draft') => {
     } else {
       await articleApi.create(data)
     }
-    const dest = isEdit.value ? `/articles/${articleId.value}` : '/mine'
+    const dest = isEdit.value ? `/articles/${articleId.value}` : '/articles'
     router.push(dest)
   } catch {
     ElMessage.error(isEdit.value ? '保存失败，请稍后重试' : '发布失败，请稍后重试')
