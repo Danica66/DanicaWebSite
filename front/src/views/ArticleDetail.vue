@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
+import { renderMarkdown } from '@/utils/markdown'
 import { articleApi } from '@/api/handleapi'
-import DOMPurify from 'dompurify'
 import CommentSection from '@/components/CommentSection.vue'
 import StateTip from '@/components/StateTip.vue'
 //init
@@ -15,7 +15,7 @@ const article = ref<any>(null)
 const loading = ref(true)
 const errorMsg = ref('')
 const isAuthor = ref(false)
-const safeHtml = (html: string) => DOMPurify.sanitize(html)
+const rendered = computed(() => renderMarkdown(article.value?.content || ''))
 const articleId = ref(0)
 
 //获取文章
@@ -38,7 +38,6 @@ const fetchArticle = async () => {
 }
 
 const goBack = () => router.back()
-const goEdit = () => router.push(`/articles/${article.value.id}/edit`)
 
 onMounted(fetchArticle)
 </script>
@@ -65,12 +64,11 @@ onMounted(fetchArticle)
           </div>
         </header>
 
-        <div class="article-body" v-html="safeHtml(article.content)" />
+        <div class="article-body markdown-body" v-html="rendered" />
 
         <div class="article-footer">
           <div class="footer-actions">
             <el-button type="primary" plain @click="goBack">← 返回</el-button>
-            <el-button v-if="isAuthor" type="warning" plain @click="goEdit">编辑</el-button>
           </div>
         </div>
       </article>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { timeAgo } from '@/utils/time'
+import { renderMarkdown } from '@/utils/markdown'
 
 const props = defineProps<{
   comment: any
@@ -30,7 +31,7 @@ const isOwn = computed(() =>
         <span v-if="parentUsername && depth >= 2" class="reply-to">回复 @{{ parentUsername }}</span>
         <span class="comment-time">{{ timeAgo(comment.created_at) }}</span>
       </div>
-      <div class="comment-content">{{ comment.content }}</div>
+      <div class="comment-content markdown-body" v-html="renderMarkdown(comment.content)"></div>
       <div class="comment-actions">
         <button v-if="currentUserId" class="action-btn" @click="$emit('reply', comment)">回复</button>
         <button v-if="isOwn" class="action-btn danger" @click="$emit('remove', comment.id)">删除</button>

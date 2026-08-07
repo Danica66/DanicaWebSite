@@ -69,6 +69,7 @@ const handleLogout = () => {
 
     <footer class="footer">
       <p>{{ siteName }} · 个人博客</p>
+      <a href="https://beian.miit.gov.cn/" target="_blank">黑ICP备2026009394号</a>
     </footer>
   </div>
 </template>

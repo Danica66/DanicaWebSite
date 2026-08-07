@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { highlightText } from '@/utils/highlight'
+import { stripMarkdown } from '@/utils/markdown'
 
 defineProps<{
   article: any
@@ -14,9 +15,8 @@ defineEmits<{
 }>()
 
 const statusLabel = (s: string) => (s === 'published' ? '已发布' : '草稿')
-const stripHtml = (html: string, max: number) => {
-  const text = html?.replace(/<[^>]*>/g, '') || ''
-  return text.length > max ? text.slice(0, max) : text
+const summaryText = (content: string) => {
+  return content ? stripMarkdown(content, 120) : ''
 }
 </script>
 
@@ -27,7 +27,7 @@ const stripHtml = (html: string, max: number) => {
   >
     <div class="card-body">
       <h3 class="card-title" v-html="highlightText(article.title, highlight)"></h3>
-      <p v-if="article.summary || article.content" class="card-summary" v-html="highlightText(article.summary || stripHtml(article.content, 120), highlight)"></p>
+      <p v-if="article.summary || article.content" class="card-summary" v-html="highlightText(article.summary || summaryText(article.content), highlight)"></p>
       <div class="card-meta">
         <span v-if="showStatus" :class="['status-badge', article.status]">
           {{ statusLabel(article.status) }}
