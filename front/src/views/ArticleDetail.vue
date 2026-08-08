@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
 import { renderMarkdown } from '@/utils/markdown'
 import { articleApi } from '@/api/handleapi'
-import CommentSection from '@/components/CommentSection.vue'
+import Giscus from '@giscus/vue'
 import StateTip from '@/components/StateTip.vue'
 //init
 const route = useRoute()
@@ -73,11 +73,22 @@ onMounted(fetchArticle)
         </div>
       </article>
 
-      <CommentSection
-        :article-id="articleId"
-        :current-user-id="authStore.userId"
-        :is-login="authStore.isLogin"
-      />
+      <Giscus
+    repo="Danica66/DanicaWebSite"
+    repoId="R_kgDOTh5CTQ"
+    category="Announcements"
+    categoryId="DIC_kwDOTx6khM4DC6kb"
+    mapping="pathname"
+    strict="0"
+    reactions-enabled="1"
+    emit-metadata="0"
+    input-position="top"
+    theme="preferred_color_scheme"
+    lang="zh-CN"
+    loading="lazy"
+    crossorigin="anonymous"
+    async
+  />
     </template>
     <!-- tip组件 -->
     <StateTip v-else type="empty" message="文章不存在">
