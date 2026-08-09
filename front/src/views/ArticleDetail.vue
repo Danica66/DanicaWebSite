@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { renderMarkdown } from '@/utils/markdown'
@@ -55,6 +55,72 @@ const fetchArticle = async () => {
 }
 
 const goBack = () => router.back()
+
+// ===== 代码块增强：注入语言标签 + 复制按钮 =====
+// v-html 渲染的是纯 HTML 字符串，无法在字符串里绑事件，
+// 所以渲染完成后用 DOM 注入工具栏。
+// 复制优先用 navigator.clipboard（https/localhost 可用）；
+// 纯 http 站点不可用，降级到 execCommand('copy') 兼容。
+const copyText = (text: string): Promise<void> => {
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text)
+  }
+  // 降级方案：临时 textarea + execCommand（http 站点可用，已被标记废弃但无替代）
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.position = 'fixed'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.select()
+    try {
+      document.execCommand('copy') ? resolve() : reject(new Error('copy failed'))
+    } catch (e) {
+      reject(e)
+    } finally {
+      document.body.removeChild(ta)
+    }
+  })
+}
+
+const enhanceCodeBlocks = () => {
+  document.querySelectorAll('.article-body pre').forEach((pre) => {
+    if (pre.querySelector('.code-toolbar')) return // 已注入过，跳过
+    const code = pre.querySelector('code')
+    // 从 <code class="hljs language-ts"> 提取语言名
+    const langMatch = code?.className.match(/language-(\w+)/)
+    const lang = langMatch ? langMatch[1] || '' : ''
+
+    // 创建工具栏：语言 + 复制按钮
+    const toolbar = document.createElement('div')
+    toolbar.className = 'code-toolbar'
+    const langSpan = document.createElement('span')
+    langSpan.className = 'code-lang'
+    langSpan.textContent = lang
+    const copyBtn = document.createElement('button')
+    copyBtn.className = 'code-copy'
+    copyBtn.textContent = '复制'
+    toolbar.append(langSpan, copyBtn)
+    pre.appendChild(toolbar)
+
+    // 点击复制
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await copyText(code?.textContent || '')
+        copyBtn.textContent = '已复制'
+        setTimeout(() => (copyBtn.textContent = '复制'), 1500)
+      } catch {
+        copyBtn.textContent = '复制失败'
+        setTimeout(() => (copyBtn.textContent = '复制'), 1500)
+      }
+    })
+  })
+}
+
+// 文章内容变化（v-html 更新）后，DOM 才真正生成，nextTick 里注入
+watch(rendered, () => {
+  nextTick(enhanceCodeBlocks)
+})
 
 onMounted(()=>{
   fetchArticle()
@@ -158,6 +224,47 @@ onMounted(()=>{
   color: var(--text);
   word-break: break-word;
   margin-bottom: 40px;
+}
+/* ===== 代码块增强（:deep 才能命中 JS 注入的 DOM） ===== */
+.article-body :deep(pre) {
+  position: relative;
+  padding-top: 44px;          /* 顶部留出工具栏的空间 */
+}
+.article-body :deep(.code-toolbar) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: #262637;        /* 比代码背景略亮的一层 */
+  border-bottom: 1px solid #33334a;
+  border-radius: 8px 8px 0 0;
+}
+.article-body :deep(.code-lang) {
+  font-size: 12px;
+  color: #8a93a8;
+  text-transform: lowercase;
+}
+.article-body :deep(.code-copy) {
+  font-size: 12px;
+  padding: 2px 10px;
+  border: 1px solid #4a4a66;
+  border-radius: 4px;
+  background: transparent;
+  color: #b8c0d0;
+  cursor: pointer;
+  opacity: 0;                 /* 默认隐藏，悬停代码块时显示 */
+  transition: opacity 0.2s;
+}
+.article-body :deep(pre:hover .code-copy) {
+  opacity: 1;
+}
+.article-body :deep(.code-copy:hover) {
+  background: #3a3a55;
+  color: #fff;
 }
 .article-footer {
   text-align: center;

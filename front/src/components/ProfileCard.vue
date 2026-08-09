@@ -7,7 +7,7 @@ const { isDark } = storeToRefs(useThemeStore())
 // 想改什么直接改这里，头像图片放到 front/public/ 下即可
 const profile = {
   name: 'Danica',
-  avatar: '../../public/avatar.jpg',      // 图片路径：front/public/avatar.png
+  avatar: '../avatar.jpg',      // 图片路径：front/public/avatar.png
   bio: '写点学习笔记和踩坑记录',
 }
 

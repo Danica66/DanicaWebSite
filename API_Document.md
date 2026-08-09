@@ -232,17 +232,27 @@
 
 | 方法 | 路径 | 鉴权 | 限流 | 说明 |
 |------|------|------|------|------|
-| POST | `/upload` | 是 | 全局兜底 | 上传头像（`multipart/form-data`，字段名 `file`） |
+| POST | `/upload` | 是 | 全局兜底 | 上传图片（`multipart/form-data`，字段名 `image`） |
 
-限制：仅允许 `.png / .jpg / .jpeg / .gif / .webp`，最大 2 MB。
+### POST /upload
+
+请求体：`multipart/form-data`，字段 `image` 为图片文件。
 
 返回：
 ```json
-{
-  "code": 200,
-  "data": { "url": "/api/avatars/xxx.jpg" }
-}
+{ "code": 200, "data": { "url": "/api/images/xxx.png" }, "message": "上传成功" }
 ```
+
+返回的 `url` 可直接写入文章 markdown：`![图片](/api/images/xxx.png)`。
+
+限制：
+- 仅允许 `image/jpeg / image/png / image/webp / image/gif`（svg 可内嵌脚本，已拒绝）
+- 最大 5 MB
+- 文件名由服务端随机生成，防路径穿越与重名覆盖
+
+### GET /api/images/:file
+
+公开访问上传的图片（无需登录）。nginx 已将 `/api/` 代理到后端，生产环境可直接使用。Docker 部署时图片持久化在 `uploads-data` volume（`/app/uploads`）。
 
 ---
 

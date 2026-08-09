@@ -4,3 +4,5 @@
 node_modules/
 .env
 docker-compose.yml
+# 上传的图片不入库
+back/uploads/

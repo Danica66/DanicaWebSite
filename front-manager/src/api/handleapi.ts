@@ -37,3 +37,12 @@ export const userApi = {
     return api.Put('/user/profile', data)
   },
 }
+
+// 图片上传：FormData，axios 自动设置 multipart 边界
+export const uploadApi = {
+  uploadImage(file: File) {
+    const form = new FormData()
+    form.append('image', file)
+    return api.Post('/upload', form)
+  },
+}

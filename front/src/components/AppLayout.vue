@@ -104,36 +104,10 @@ onMounted(() => {
 .nav-links a:hover {
   color: var(--primary);
 }
-.rss-nav {
-  color: #e6a23c !important;
-  font-weight: 500;
-}
 .theme-btn {
   font-size: 18px;
   cursor: pointer;
   user-select: none;
-}
-.user-tag {
-  color: var(--text-muted);
-  cursor: default;
-  font-size: 14px;
-}
-.logout-btn {
-  color: #e6a23c;
-  cursor: pointer;
-}
-.logout-btn:hover {
-  color: #f0a020;
-}
-.register-link {
-  padding: 4px 12px;
-  border: 1px solid var(--primary);
-  border-radius: 4px;
-  color: var(--primary);
-}
-.register-link:hover {
-  background: var(--primary);
-  color: #fff !important;
 }
 
 .main-content {

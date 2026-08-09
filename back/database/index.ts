@@ -7,6 +7,9 @@ const db = mysql.createPool({
     user: Cdatabase.username,
     password: Cdatabase.password,
     database: Cdatabase.database,
+    connectionLimit: Cdatabase.pool.max,
+    waitForConnections: true,
+    queueLimit: 0,
 });
 
 export default db;

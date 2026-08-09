@@ -11,6 +11,7 @@ const PUBLIC_ROUTES = [
   { regex: /^\/api\/rss$/,            methods: ['GET'] },
   { regex: /^\/api\/articles\/\d+$/, methods: ['GET'] },
   { regex: /^\/api\/avatars\/.+/,   methods: ['GET'] },
+  { regex: /^\/api\/images\/.+/,    methods: ['GET'] },
   { regex: /^\/api\/articles\/\d+\/comments$/, methods: ['GET'] },
 ]
 

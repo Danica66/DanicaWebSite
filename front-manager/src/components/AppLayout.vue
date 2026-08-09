@@ -154,16 +154,6 @@ const handleLogout = () => {
 .logout-btn:hover {
   color: #f0a020;
 }
-.register-link {
-  padding: 4px 12px;
-  border: 1px solid var(--primary);
-  border-radius: 4px;
-  color: var(--primary);
-}
-.register-link:hover {
-  background: var(--primary);
-  color: #fff !important;
-}
 
 .main-content {
   flex: 1;

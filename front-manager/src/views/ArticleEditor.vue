@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import StateTip from '@/components/StateTip.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { articleApi } from '@/api/handleapi'
+import { articleApi, uploadApi } from '@/api/handleapi'
 import { ElMessage } from 'element-plus'
 import { renderMarkdown, stripMarkdown } from '@/utils/markdown'
 
@@ -16,6 +16,7 @@ const summary = ref('')
 const loading = ref(false)
 const pageLoading = ref(false)
 const showPreview = ref(false)
+const uploadLoading = ref(false)
 
 const isEdit = computed(() => !!articleId.value)
 
@@ -39,12 +40,6 @@ const fetchArticleDetail = async () => {
     }
   }
 }
-
-// 根据内容变化自动更新摘要
-watch(content, (val) => {
-  if (!summary.value) return
-  // 仅在编辑模式下自动同步
-})
 
 const insertMarkdown = (before: string, after = '') => {
   const textarea = document.querySelector('.md-textarea') as HTMLTextAreaElement
@@ -72,9 +67,33 @@ const toolbarActions: { label: string; before: string; after: string; tip: strin
   { label: '·', before: '\n- ', after: '', tip: '无序列表' },
   { label: '1.', before: '\n1. ', after: '', tip: '有序列表' },
   { label: '🔗', before: '[', after: '](url)', tip: '链接' },
-  { label: '🖼', before: '![alt](', after: ')', tip: '图片' },
+  { label: '🖼', before: '![alt](', after: ')', tip: '图片（外链）' },
   { label: '—', before: '\n---\n', after: '', tip: '分隔线' },
 ]
+
+// 图片上传：选择文件 -> 上传 -> 拿到 URL 插入 markdown
+const fileInput = ref<HTMLInputElement | null>(null)
+const triggerUpload = () => fileInput.value?.click()
+
+const handleFileChange = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = '' // 允许连续选择同一文件
+  if (!file) return
+  uploadLoading.value = true
+  try {
+    const res: any = await uploadApi.uploadImage(file)
+    const url = res.data?.url
+    if (!url) throw new Error('上传响应缺少 url')
+    insertMarkdown(`![图片](${url})`)
+    ElMessage.success('图片上传成功')
+  } catch (err: any) {
+    const msg = err?.response?.data?.message || '图片上传失败'
+    ElMessage.error(msg)
+  } finally {
+    uploadLoading.value = false
+  }
+}
 
 const handleSubmit = async (status: 'published' | 'draft') => {
   if (!title.value.trim() || !content.value.trim()) return
@@ -127,10 +146,20 @@ onMounted(fetchArticleDetail)
           @click="insertMarkdown(a.before, a.after)"
         >{{ a.label }}</button>
         <span class="toolbar-spacer" />
+        <button class="md-btn" :disabled="uploadLoading" title="上传本地图片" @click="triggerUpload">
+          {{ uploadLoading ? '上传中…' : '⏫ 图片' }}
+        </button>
         <button class="md-btn preview-toggle" @click="showPreview = !showPreview">
           {{ showPreview ? '✏ 编辑' : '👁 预览' }}
         </button>
       </div>
+      <input
+        ref="fileInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        hidden
+        @change="handleFileChange"
+      />
 
       <!-- 编辑区 -->
       <div class="md-editor" :class="{ previewing: showPreview }">
@@ -204,6 +233,7 @@ onMounted(fetchArticleDetail)
   transition: background 0.15s;
 }
 .md-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+.md-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .toolbar-spacer { flex: 1; }
 .preview-toggle { font-size: 12px; font-weight: 400; }
 
