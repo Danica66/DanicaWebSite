@@ -44,26 +44,6 @@ CREATE TABLE `articles`  (
 -- ----------------------------
 
 -- ----------------------------
--- Table structure for email_codes
--- ----------------------------
-DROP TABLE IF EXISTS `email_codes`;
-CREATE TABLE `email_codes`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `code` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `expires_at` timestamp NOT NULL,
-  `attempts` int NULL DEFAULT 0,
-  `used` tinyint(1) NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_email`(`email` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of email_codes
--- ----------------------------
-
--- ----------------------------
 -- Table structure for users
 -- ----------------------------
 DROP TABLE IF EXISTS `users`;

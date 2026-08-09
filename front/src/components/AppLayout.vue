@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useauthStore } from '@/stores/auth'
 //init
-const router = useRouter()
-const authStore = useauthStore()
-
 const siteName = import.meta.env.VITE_SITE_NAME || 'Danica'
 
 // 移动端菜单
@@ -29,10 +24,6 @@ onMounted(() => {
   }
 })
 
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
-}
 </script>
 
 <template>
@@ -50,15 +41,6 @@ const handleLogout = () => {
           <span class="theme-btn" @click="toggleDark">
             {{ isDark ? '☀️' : '🌙' }}
           </span>
-
-          <template v-if="authStore.isLogin">
-            <router-link to="/profile" class="user-tag" @click="closeMenu">{{ authStore.username }}</router-link>
-            <span class="logout-btn" @click="handleLogout">退出</span>
-          </template>
-          <template v-else>
-            <router-link to="/login" @click="closeMenu">登录</router-link>
-            <router-link to="/register" class="register-link" @click="closeMenu">注册</router-link>
-          </template>
         </div>
       </div>
     </header>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { articleApi } from '@/api/handleapi'
+import { articleApi } from '@/api/article'
 import StateTip from '@/components/StateTip.vue'
 import ArticleCard from '@/components/ArticleCard.vue'
 //init

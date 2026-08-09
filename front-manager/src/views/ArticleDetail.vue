@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useauthStore } from '@/stores/auth'
 import { articleApi } from '@/api/handleapi'
 import { renderMarkdown } from '@/utils/markdown'
-import CommentSection from '@/components/CommentSection.vue'
 import StateTip from '@/components/StateTip.vue'
 //init
 const route = useRoute()
@@ -16,7 +15,6 @@ const loading = ref(true)
 const errorMsg = ref('')
 const isAuthor = ref(false)
 const rendered = computed(() => renderMarkdown(article.value?.content || ''))
-const articleId = ref(0)
 
 //获取文章
 const fetchArticle = async () => {
@@ -26,7 +24,6 @@ const fetchArticle = async () => {
     loading.value = false; 
     return 
   }
-  articleId.value = id
   loading.value = true
   try {
     const res= await articleApi.getDetail(id)
@@ -74,12 +71,6 @@ onMounted(fetchArticle)
           </div>
         </div>
       </article>
-
-      <CommentSection
-        :article-id="articleId"
-        :current-user-id="authStore.userId"
-        :is-login="authStore.isLogin"
-      />
     </template>
     <!-- tip组件 -->
     <StateTip v-else type="empty" message="文章不存在">

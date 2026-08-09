@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 import { computed } from 'vue'
 import { userApi } from '@/api/handleapi'
-import { uploadApi } from '@/api/handleapi'
 import { useauthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
 import StateTip from '@/components/StateTip.vue'
@@ -11,8 +10,6 @@ const authStore = useauthStore()
 //var
 const loading = ref(true)
 const saving = ref(false)
-const uploading = ref(false)
-const fileInput = ref<HTMLInputElement | null>(null)
 //创建信息格式
 const form = ref({
   email: '',
@@ -37,28 +34,6 @@ const handleSave = async () => {
   } finally {
     saving.value = false
   }
-}
-//上传
-const handleUpload = async (e: Event) => {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-  uploading.value = true
-  try {
-    const res= await uploadApi.uploadAvatar(file)
-    form.value.avatar = res.data.url
-    await userApi.updateProfile({ avatar: form.value.avatar })
-    ElMessage.success('上传成功')
-  } catch {
-    ElMessage.error('上传失败')
-  } finally {
-    uploading.value = false
-    input.value = ''
-  }
-}
-//点击触发保存元素
-const triggerUpload = () => {
-  fileInput.value?.click()
 }
 //加载信息
 const fetchProfile=async () => {
@@ -104,11 +79,7 @@ onMounted(async() => {
 
         <div class="field">
           <label>头像</label>
-          <div class="avatar-row">
-            <el-input v-model="form.avatar" placeholder="https://..." maxlength="200" clearable />
-            <el-button :loading="uploading" @click="triggerUpload">上传</el-button>
-          </div>
-          <input ref="fileInput" type="file" accept="image/*" hidden @change="handleUpload" />
+          <el-input v-model="form.avatar" placeholder="https://..." maxlength="200" clearable />
           <img v-if="avatarUrl" :src="avatarUrl" class="avatar-preview" />
         </div>
         <!-- 提交 -->
@@ -164,13 +135,6 @@ onMounted(async() => {
   border-top: 1px solid var(--border);
 }
 
-.avatar-row {
-  display: flex;
-  gap: 8px;
-}
-.avatar-row .el-input {
-  flex: 1;
-}
 .avatar-preview {
   display: block;
   width: 80px;
@@ -184,9 +148,6 @@ onMounted(async() => {
 @media (max-width: 768px) {
   .card {
     padding: 20px 18px;
-  }
-  .avatar-row {
-    flex-wrap: wrap;
   }
 }
 </style>

@@ -14,19 +14,6 @@ export const select_username=(user: UserLogin): Promise<RowDataPacket[]> =>{
     })
   })
 }
-// 插入用户密码
-export const insert_username_password=(user: UserLogin): Promise<RowDataPacket[]>=>{
-     return new Promise((resolve, reject) => {
-    const sql = 'INSERT INTO users (username, password, email, email_verified) VALUES (?, ?, ?, 1)'
-    db.query(sql, [user.username, user.password, user.email || null], (err, result:RowDataPacket[]) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(result)
-      }
-    })
-  })
-}
 // 根据 ID 查用户
 export const select_user_by_id =(id: number): Promise<RowDataPacket[]>=>{
   return new Promise((resolve, reject) => {
@@ -48,9 +35,6 @@ export const update_user =(id: number, profile: UserProfile): Promise<RowDataPac
 
     if (profile.email !== undefined) {
       sets.push('email = ?')
-      params.push(profile.email || null)
-      // 邮箱变更时重置验证状态
-      sets.push('email_verified = IF(email = ?, email_verified, 0)')
       params.push(profile.email || null)
     }
     if (profile.avatar !== undefined) {

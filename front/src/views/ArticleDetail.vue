@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useauthStore } from '@/stores/auth'
 import { renderMarkdown } from '@/utils/markdown'
-import { articleApi } from '@/api/handleapi'
+import { articleApi } from '@/api/article'
 import Giscus from '@giscus/vue'
 import StateTip from '@/components/StateTip.vue'
 //init
 const route = useRoute()
 const router = useRouter()
-const authStore = useauthStore()
 //var
 const article = ref<any>(null)
 const loading = ref(true)
@@ -31,7 +29,6 @@ const fetchArticle = async () => {
   try {
     const res= await articleApi.getDetail(id)
     article.value = res.data
-    isAuthor.value = String(authStore.userId) === String(article.value.author_id)
   } catch {
     errorMsg.value = '文章加载失败'
   } finally { loading.value = false }
@@ -77,7 +74,7 @@ onMounted(fetchArticle)
     repo="Danica66/DanicaWebSite"
     repoId="R_kgDOTh5CTQ"
     category="Announcements"
-    categoryId="DIC_kwDOTx6khM4DC6kb"
+    categoryId="DIC_kwDOTh5CTc4DC6p-"
     mapping="pathname"
     strict="0"
     reactions-enabled="1"

@@ -5,11 +5,9 @@ import authRoutes from './routes/auth'
 import articlesRoutes from './routes/articles'
 import userRoutes from './routes/user'
 import rssRoutes from './routes/rss'
-import uploadRoutes from './routes/upload'
-import commentRoutes from './routes/comment'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver, CallowedOrigins } from './config/index'
-import { authLimiter, publicLimiter, globalLimiter, commentLimiter } from './middleware/rateLimit'
+import { authLimiter, publicLimiter, globalLimiter } from './middleware/rateLimit'
 
 
 //init
@@ -38,9 +36,7 @@ app.use('/api/articles', publicLimiter, articlesRoutes)
 app.use('/api/user', userRoutes)
 // RSS 订阅源（公开）
 app.use('/api/rss', rssRoutes)
-// 文件上传（需登录）
-app.use('/api/upload', uploadRoutes)
-app.use('/api', commentLimiter, commentRoutes)
+
 
 
 // 404

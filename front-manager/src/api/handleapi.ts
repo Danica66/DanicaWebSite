@@ -37,23 +37,3 @@ export const userApi = {
     return api.Put('/user/profile', data)
   },
 }
-
-export const uploadApi = {
-  uploadAvatar(file: File) {
-    const form = new FormData()
-    form.append('file', file, file.name)
-    return api.Post('/upload', form)
-  },
-}
-
-export const commentApi = {
-  getList(articleId: number) {
-    return api.Get(`/articles/${articleId}/comments`)
-  },
-  create(articleId: number, data: { content: string; parent_id?: number | null }) {
-    return api.Post(`/articles/${articleId}/comments`, data)
-  },
-  delete(commentId: number) {
-    return api.Delete(`/comments/${commentId}`)
-  },
-}
