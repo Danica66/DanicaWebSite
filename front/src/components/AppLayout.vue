@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useThemeStore } from '@/stores/theme'
 //init
 const siteName = import.meta.env.VITE_SITE_NAME || 'Danica'
 
@@ -7,21 +8,11 @@ const siteName = import.meta.env.VITE_SITE_NAME || 'Danica'
 const menuOpen = ref(false)
 const closeMenu = () => { menuOpen.value = false }
 
-// 黑夜模式
-const isDark = ref(false)
-
-const toggleDark = () => {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-}
+// 黑夜模式（共享状态，AppLayout 与 ArticleDetail 的 giscus 同步）
+const { isDark, toggleTheme, initTheme } = useThemeStore()
 
 onMounted(() => {
-  const saved = localStorage.getItem('theme')
-  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
+  initTheme()
 })
 
 </script>
@@ -38,7 +29,7 @@ onMounted(() => {
           <router-link to="/articles" @click="closeMenu">文章</router-link>
           <a href="/api/rss" class="rss-nav" @click="closeMenu">RSS</a>
 
-          <span class="theme-btn" @click="toggleDark">
+          <span class="theme-btn" @click="toggleTheme">
             {{ isDark ? '☀️' : '🌙' }}
           </span>
         </div>

@@ -1,20 +1,40 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { renderMarkdown } from '@/utils/markdown'
 import { articleApi } from '@/api/article'
 import Giscus from '@giscus/vue'
 import StateTip from '@/components/StateTip.vue'
+import { useThemeStore } from '@/stores/theme'
+import lightThemeCss from '@/giscus/light.css?raw'
+import darkThemeCss from '@/giscus/dark.css?raw'
 //init
 const route = useRoute()
 const router = useRouter()
+const { isDark } = storeToRefs(useThemeStore())
 //var
 const article = ref<any>(null)
 const loading = ref(true)
 const errorMsg = ref('')
-const isAuthor = ref(false)
 const rendered = computed(() => renderMarkdown(article.value?.content || ''))
 const articleId = ref(0)
+
+//giscus 主题跟随网站主题：把 CSS 转成 data URL 内联。
+//不能直接引 /giscus/light.css —— giscus iframe 在 https://giscus.app 内部加载该 URL，
+//站点是 http 时会被浏览器 mixed-content 拦截；data URL 不发起网络请求，无此问题。
+//注意：btoa 只支持 Latin-1，CSS 含中文等非 ASCII 字符会抛异常，必须先按 UTF-8 编码。
+const toBase64 = (str: string) => {
+  const bytes = new TextEncoder().encode(str)
+  let binary = ''
+  bytes.forEach((b) => (binary += String.fromCharCode(b)))
+  return btoa(binary)
+}
+
+const giscusTheme = computed(() => {
+  const css = isDark.value ? darkThemeCss : lightThemeCss
+  return `data:text/css;base64,${toBase64(css)}`
+})
 
 //获取文章
 const fetchArticle = async () => {
@@ -36,7 +56,9 @@ const fetchArticle = async () => {
 
 const goBack = () => router.back()
 
-onMounted(fetchArticle)
+onMounted(()=>{
+  fetchArticle()
+})
 </script>
 
 <template>
@@ -80,7 +102,7 @@ onMounted(fetchArticle)
     reactions-enabled="1"
     emit-metadata="0"
     input-position="top"
-    theme="preferred_color_scheme"
+    :theme="giscusTheme"
     lang="zh-CN"
     loading="lazy"
     crossorigin="anonymous"

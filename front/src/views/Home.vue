@@ -39,8 +39,8 @@ onMounted(() =>
   <div class="home">
     <!-- 标题栏 -->
     <section class="banner">
-      <h1>欢迎来到 {{ siteName }}</h1>
-      <p>记录思考，分享知识。每一篇文章都是一次对话。</p>
+      <h1>欢迎来到{{ siteName }}的小站</h1>
+      <p>随便发一点学习笔记什么的</p>
     </section>
     <!-- 最近文章 -->
     <section class="recent">

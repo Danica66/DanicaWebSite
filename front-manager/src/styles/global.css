@@ -1,17 +1,26 @@
 /* 亮色主题（默认） */
 :root {
-  --bg: #f8f9fa;
-  --bg-card: #fff;
-  --text: #333;
-  --text-secondary: #777;
-  --text-muted: #bbb;
-  --border: #eee;
+  --bg: #e4e7ea;
+  --bg-card: #f0f1f3;
+  --text: #23282f;
+  --text-secondary: #5d6875;
+  --text-muted: #8a939e;
+  --border: #d2d7dd;
   --primary: #409eff;
   --primary-light: #6fb3f8;
-  --navbar-bg: #fff;
-  --shadow: rgba(0, 0, 0, 0.04);
-  --card-shadow: rgba(0, 0, 0, 0.08);
-  --highlight-bg: #fff3cd;
+  --navbar-bg: #eceef0;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --card-shadow: rgba(0, 0, 0, 0.12);
+  --highlight-bg: #fdf0c9;
+
+  /* Element Plus 组件背景统一到新色板 */
+  --el-bg-color-page: #e4e7ea;
+  --el-bg-color: #f0f1f3;
+  --el-bg-color-overlay: #f0f1f3;
+  --el-fill-color-blank: #f0f1f3;
+  --el-border-color: #c9ced5;
+  --el-border-color-light: #d0d5dc;
+  --el-border-color-lighter: #d8dde3;
 }
 
 /* 暗色主题 */
