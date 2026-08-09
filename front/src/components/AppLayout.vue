@@ -27,8 +27,6 @@ onMounted(() => {
         </button>
         <div class="nav-links" :class="{ open: menuOpen }">
           <router-link to="/articles" @click="closeMenu">文章</router-link>
-          <a href="/api/rss" class="rss-nav" @click="closeMenu">RSS</a>
-
           <span class="theme-btn" @click="toggleTheme">
             {{ isDark ? '☀️' : '🌙' }}
           </span>

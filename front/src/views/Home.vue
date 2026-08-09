@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { articleApi } from '@/api/article'
 import StateTip from '@/components/StateTip.vue'
 import ArticleCard from '@/components/ArticleCard.vue'
+import ProfileCard from '@/components/ProfileCard.vue'
 //init
 const router = useRouter()
 //var
@@ -42,25 +43,28 @@ onMounted(() =>
       <h1>欢迎来到{{ siteName }}的小站</h1>
       <p>随便发一点学习笔记什么的</p>
     </section>
-    <!-- 最近文章 -->
-    <section class="recent">
-      <div class="recent-header">
-        <h2>最新文章</h2>
-        <router-link to="/articles" class="view-all">查看全部 →</router-link>
-      </div>
-      <!-- tip组件 -->
-      <StateTip v-if="loading" type="loading" />
-      <StateTip v-else-if="articles.length === 0" type="empty" message="暂无文章" />
-      <!-- 展示文章 -->
-      <div v-else class="article-list">
-        <ArticleCard
-          v-for="item in articles"
-          :key="item.id"
-          :article="item"
-          @click="goDetail"
-        />
-      </div>
-    </section>
+    <div class="home-body">
+      <ProfileCard />
+      <!-- 最近文章 -->
+      <section class="recent">
+        <div class="recent-header">
+          <h2>最新文章</h2>
+          <router-link to="/articles" class="view-all">查看全部 →</router-link>
+        </div>
+        <!-- tip组件 -->
+        <StateTip v-if="loading" type="loading" />
+        <StateTip v-else-if="articles.length === 0" type="empty" message="暂无文章" />
+        <!-- 展示文章 -->
+        <div v-else class="article-list">
+          <ArticleCard
+            v-for="item in articles"
+            :key="item.id"
+            :article="item"
+            @click="goDetail"
+          />
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -83,9 +87,18 @@ onMounted(() =>
 }
 
 .recent {
-  max-width: 720px;
+  min-width: 0; /* 防止 Grid 子项被内容撑破 */
+}
+
+/* 主体两栏布局：左个人信息（240px）+ 右最新文章 */
+.home-body {
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 var(--page-padding-x) 64px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: start;
 }
 .recent-header {
   display: flex;
@@ -122,6 +135,11 @@ onMounted(() =>
   }
   .banner p { 
     font-size: 14px; 
+  }
+  /* 移动端降级为单列：个人信息卡片显示在文章上方 */
+  .home-body {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 </style>
