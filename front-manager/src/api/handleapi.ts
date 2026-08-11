@@ -13,7 +13,8 @@ export const articleApi = {
     return api.Get('/articles', params);
   },
   getDetail(id: number) {
-    return api.Get(`/articles/${id}`);
+    // noCount=1：管理台查看/编辑不增加阅读数（后端据此跳过 view_count+1）
+    return api.Get(`/articles/${id}`, { noCount: '1' });
   },
   create(data: { title: string; content: string; summary?: string }) {
     return api.Post('/articles', data);

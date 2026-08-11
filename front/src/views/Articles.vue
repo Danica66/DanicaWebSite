@@ -85,12 +85,31 @@ onMounted(() =>
   margin: 0 auto;
   padding: 32px var(--page-padding-x) 64px;
 }
-.page-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 20px; }
+.page-title { 
+  font-size: 22px; 
+  font-weight: 600; 
+  color: var(--text); 
+  margin-bottom: 20px; 
+}
 
-.search-bar { display: flex; gap: 12px; margin-bottom: 24px; }
-.search-input { flex: 1; }
+.search-bar { 
+  display: flex; 
+  gap: 12px; 
+  margin-bottom: 24px; 
+}
+.search-input { 
+  flex: 1; 
+}
 
-.article-list { display: flex; flex-direction: column; gap: 12px; }
+.article-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+}
 
-.pager { display: flex; justify-content: center; margin-top: 32px; }
+.pager { 
+  display: flex; 
+  justify-content: center; 
+  margin-top: 32px; 
+}
 </style>

@@ -24,7 +24,9 @@ export const getSingleArticleController=async(req:Request,res:Response)=>{
         return res.error('缺少文章 ID')
     }
     try {
-        return res.success(await getSingleArticleService(id),`id:${id}查找文章成功`)
+        // 管理台编辑/预览请求带 ?noCount=1，不计入阅读数
+        const countView = req.query.noCount !== '1'
+        return res.success(await getSingleArticleService(id, countView),`id:${id}查找文章成功`)
     } catch (err: any) {
         console.error('id查找文章失败:', err)
         return res.error(err.message || 'id查找文章失败', 1, 500)

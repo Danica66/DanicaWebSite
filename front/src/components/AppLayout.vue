@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useThemeStore } from '@/stores/theme'
 //init
 const siteName = import.meta.env.VITE_SITE_NAME || 'Danica'
@@ -9,7 +10,10 @@ const menuOpen = ref(false)
 const closeMenu = () => { menuOpen.value = false }
 
 // 黑夜模式（共享状态，AppLayout 与 ArticleDetail 的 giscus 同步）
-const { isDark, toggleTheme, initTheme } = useThemeStore()
+// 注意：isDark 必须用 storeToRefs 解构，直接解构会得到解包后的快照（失去响应式）
+const themeStore = useThemeStore()
+const { isDark } = storeToRefs(themeStore)
+const { toggleTheme, initTheme } = themeStore
 
 onMounted(() => {
   initTheme()
@@ -41,6 +45,7 @@ onMounted(() => {
     <footer class="footer">
       <p>{{ siteName }} · 个人博客</p>
       <a href="https://beian.miit.gov.cn/" target="_blank">黑ICP备2026009394号</a>
+      <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=23100002000275" target="_blank" > &nbsp;黑公网安备23100002000275号</a>
     </footer>
   </div>
 </template>

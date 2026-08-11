@@ -6,3 +6,8 @@ node_modules/
 docker-compose.yml
 # 上传的图片不入库
 back/uploads/
+# SSL 私钥不入库（front/ssl/fullchain.pem 为公开证书可提交）
+front/ssl/
+# 管理台 SSL 私钥同样不入库
+front-manager/ssl/
+danicablog.cn_nginx

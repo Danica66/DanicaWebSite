@@ -8,8 +8,8 @@ export const getArticleListService=async (page:number,limit:number,keyword:strin
     const total = (countResult[0] as any).total || 0
     return { list, total }
 }
-export const getSingleArticleService=async(id:number)=>{
-    await update_article_viewcount(id)
+export const getSingleArticleService=async(id:number, countView: boolean = true)=>{
+    if (countView) await update_article_viewcount(id)
     const rows = await select_articlebyid(id)
     return rows[0] || null
 }
