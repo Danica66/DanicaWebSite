@@ -1,41 +1,41 @@
 import api from "@/api"
-export const authApi={
-    login(data: { username: string; password: string }) {
-    return api.Post('/auth/login', data);
-    },
-    refresh(data: { refreshtoken: string }) {
-        return api.Post('/auth/refresh', data);
+import type { ApiResponse, ArticlePayload, ArticleStatus } from "@/types"
+import type { ArticleListResult, ArticleDetail, LoginParams, LoginResult, RefreshResult, UserProfile } from "@/types"
+
+export const authApi = {
+  login(data: LoginParams) {
+    return api.Post<LoginResult>('/auth/login', data);
+  },
+  refresh(data: { refreshtoken: string }) {
+    return api.Post<RefreshResult>('/auth/refresh', data);
   },
 }
 
 export const articleApi = {
-  getList(params: { page: number; limit: number; keyword?: string }) {
-    return api.Get('/articles', params);
+  getList(params: { page: number; limit: number; keyword?: string, status?: ArticleStatus }) {
+    return api.Get<ArticleListResult>('/articles', params);
   },
   getDetail(id: number) {
     // noCount=1：管理台查看/编辑不增加阅读数（后端据此跳过 view_count+1）
-    return api.Get(`/articles/${id}`, { noCount: '1' });
+    return api.Get<ArticleDetail>(`/articles/${id}`, { noCount: '1' });
   },
-  create(data: { title: string; content: string; summary?: string }) {
-    return api.Post('/articles', data);
+  create(data: ArticlePayload) {
+    return api.Post<ApiResponse<unknown>>('/articles', data);
   },
-  update(id: number, data: { title?: string; content?: string; summary?: string }) {
-    return api.Put(`/articles/${id}`, data);
+  update(id: number, data: ArticlePayload) {
+    return api.Put<ApiResponse<unknown>>(`/articles/${id}`, data);
   },
   delete(id: number) {
-    return api.Delete(`/articles/${id}`);
-  },
-  getMine(params: { page: number; limit: number; status?: string }) {
-    return api.Get('/articles/mine', params);
+    return api.Delete<ApiResponse<unknown>>(`/articles/${id}`);
   },
 }
 
 export const userApi = {
   getProfile() {
-    return api.Get('/user/profile')
+    return api.Get<UserProfile>('/user/profile')
   },
   updateProfile(data: { email?: string; avatar?: string }) {
-    return api.Put('/user/profile', data)
+    return api.Put<ApiResponse<unknown>>('/user/profile', data)
   },
 }
 
@@ -44,6 +44,6 @@ export const uploadApi = {
   uploadImage(file: File) {
     const form = new FormData()
     form.append('image', file)
-    return api.Post('/upload', form)
+    return api.Post<{ url: string }>('/upload', form)
   },
 }

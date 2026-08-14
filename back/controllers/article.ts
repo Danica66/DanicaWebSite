@@ -1,6 +1,7 @@
 import { Request,Response } from "express"
-import { getSingleArticleService,getArticleListService,updateArticleService,deleteArticleService,releaseArticleService,getMyArticlesService } from "../service/article"
-import { Article } from "../type"
+import { getSingleArticleService,getArticleListService,updateArticleService,deleteArticleService,releaseArticleService} from "../service/article"
+import { Article, Articlestatus } from "../type"
+//公共接口controller
 export const getArticleListController=async (req:Request,res:Response)=>{
     const page = parseInt(req.query.page as string)
     const limit = parseInt(req.query.limit as string)
@@ -12,7 +13,26 @@ export const getArticleListController=async (req:Request,res:Response)=>{
         return res.error('limit 必须为 1–100')
     }
     try {
-        return res.success(await getArticleListService(page,limit,keyword),'获取文章成功')
+        return res.success(await getArticleListService(page,limit,keyword,'published'),`获取文章成功`)
+    } catch (err: any) {
+        console.error('获取文章失败:', err)
+        return res.error(err.message || '获取文章失败', 1, 500)
+    }
+}
+//管理员接口controller
+export const getArticleListManagerController=async (req:Request,res:Response)=>{
+    const page = parseInt(req.query.page as string)
+    const limit = parseInt(req.query.limit as string)
+    const keyword = req.query.keyword as string
+    const status=req.query.status as Articlestatus
+    if (!page || page < 1) {
+        return res.error('page 必须 >= 1')
+    }
+    if (!limit || limit < 1 || limit > 100) {
+        return res.error('limit 必须为 1–100')
+    }
+    try {
+        return res.success(await getArticleListService(page,limit,keyword,status),`获取${status}文章成功`)
     } catch (err: any) {
         console.error('获取文章失败:', err)
         return res.error(err.message || '获取文章失败', 1, 500)
@@ -79,16 +99,4 @@ export const deleteArticleController=async(req:Request,res:Response)=>{
         return res.error(err.message || 'id删除文章失败', 1, 500)
     }
 }
-export const getMyArticlesController=async(req:Request,res:Response)=>{
-    const status = req.query.status as string | undefined
-    if (status && status !== 'draft' && status !== 'published') {
-        return res.error('status 参数只能是 draft 或 published')
-    }
-    try {
-        const articles = await getMyArticlesService(req.user.userId, status)
-        return res.success(articles, '获取我的文章成功')
-    } catch (err: any) {
-        console.error('获取我的文章失败:', err)
-        return res.error(err.message || '获取我的文章失败', 1, 500)
-    }
-}
+

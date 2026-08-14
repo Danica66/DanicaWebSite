@@ -1,6 +1,7 @@
 import { useauthStore } from "@/stores/auth";
 import axios from "axios";
 import { ElMessage } from "element-plus";
+import type { ApiResponse } from "@/types";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
 const timeout = parseInt(import.meta.env.VITE_TIMEOUT, 10) || 10000
@@ -48,16 +49,16 @@ instance.interceptors.response.use(
 )
 
 //封装api方法
-export function Get(url:string,params={},config={}){
+export function Get<T = any>(url:string,params={},config={}): Promise<ApiResponse<T>>{
     return instance.get(url,{params,...config})
 }
-export function Post(url:string,data={},config={}){
+export function Post<T = any>(url:string,data={},config={}): Promise<ApiResponse<T>>{
     return instance.post(url,data,config)
 }
-export function Put(url:string,data={},config={}){
+export function Put<T = any>(url:string,data={},config={}): Promise<ApiResponse<T>>{
     return instance.put(url,data,config)
 }
-export function Delete(url:string,config={}){
+export function Delete<T = any>(url:string,config={}): Promise<ApiResponse<T>>{
     return instance.delete(url,config)
 }
 const api={

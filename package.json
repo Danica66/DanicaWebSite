@@ -2,8 +2,11 @@
   "scripts": {
     "install:all": "npm i && cd front && npm install && cd ../back && npm install",
     "dev": "concurrently --names \"SERVER,CLIENT\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run dev:node\" \"npm run dev:vue\"",
+    "test": "concurrently --names \"SERVER,CLIENT\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run dev:node\" \"npm run dev:manage\"",
     "dev:node": "cd back && npm run dev",
-    "dev:vue": "cd front && npm run dev"
+    "dev:vue": "cd front && npm run dev",
+    "dev:manage": "cd front-manager && npm run dev",
+    "docker": "docker login && docker compose --profile admin build && docker compose --profile admin push"
   },
   "dependencies": {
     "concurrently": "^10.0.4"

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import AppLayout from '@/components/AppLayout.vue'
+import AppHeaderFooter from '@/components/AppHeaderFooter.vue';
 </script>
 
 <template>
-  <AppLayout>
+  <AppHeaderFooter>
     <RouterView />
-  </AppLayout>
+  </AppHeaderFooter>
 </template>

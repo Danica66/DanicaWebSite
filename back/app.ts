@@ -5,6 +5,7 @@ import authRoutes from './routes/auth'
 import articlesRoutes from './routes/articles'
 import userRoutes from './routes/user'
 import rssRoutes from './routes/rss'
+import articlesmanagerRoutes from './routes/articlesmanagerRoutes'
 import uploadRoutes from './routes/upload'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver, CallowedOrigins } from './config/index'
@@ -27,17 +28,18 @@ app.use(authMiddleware)
 
 // 静态文件
 app.use('/api/avatars', express.static('public/avatars'))
-app.use('/api/images', express.static('uploads'))
 // 限流
 app.use('/api', globalLimiter)
-// 登录/注册: 1分钟5次
-app.use('/api/auth', authLimiter, authRoutes)
- // 公开文章: 15分钟100次
-app.use('/api/articles', publicLimiter, articlesRoutes)
- // 用户信息（需登录）
-app.use('/api/user', userRoutes)
+// 查看文章
+app.use('/api/articles', publicLimiter ,articlesRoutes)
+// 管理员登录
+app.use('/admin/auth', authLimiter, authRoutes)
+ // 管理员操作文章
+app.use('/admin/articles', articlesmanagerRoutes)
+ // 管理员信息
+app.use('/admin/user', userRoutes)
 // 图片上传（需登录，POST 时校验 token）
-app.use('/api/upload', uploadRoutes)
+app.use('/admin/upload', uploadRoutes)
 // RSS 订阅源（公开）
 app.use('/api/rss', rssRoutes)
 

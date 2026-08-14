@@ -16,6 +16,7 @@ declare global {
     }
   }
 }
+
 //user接口(类型)
 export interface UserPayload {
   userId: number
@@ -31,10 +32,11 @@ export interface UserProfile {
   avatar?: string
 }
 //article
+export type Articlestatus= 'draft' | 'published'
 export interface Article {
   id?: number
   title: string
-  status?: 'draft' | 'published'
+  status?: Articlestatus
   content: string
   summary?: string
   cover_image?: string

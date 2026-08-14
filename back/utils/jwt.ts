@@ -3,11 +3,12 @@ import { Cjwt } from '../config/index'
   
 
 export const generateToken = (userId: number) => {
-  return jwt.sign({ userId }, Cjwt.secret, { expiresIn: Cjwt.expiresIn })
+  // Cjwt.expiresIn 来自 process.env（string），需断言为 SignOptions 的 StringValue 字面量类型
+  return jwt.sign({ userId }, Cjwt.secret, { expiresIn: Cjwt.expiresIn as jwt.SignOptions['expiresIn'] })
 }
 
 export const generateRefreshToken = (userId: number) => {
-  return jwt.sign({ userId }, Cjwt.refreshSecret, { expiresIn: Cjwt.refreshExpiresIn })
+  return jwt.sign({ userId }, Cjwt.refreshSecret, { expiresIn: Cjwt.refreshExpiresIn as jwt.SignOptions['expiresIn'] })
 }
 
 export const verifyToken = (token: string) => {

@@ -3,16 +3,12 @@ import { verifyToken } from '../utils/jwt'
 import { UserPayload } from '../type'
 
 const PUBLIC_ROUTES = [
-  { regex: /^\/api\/auth\/login$/,    methods: ['POST'] },
-  { regex: /^\/api\/auth\/register$/, methods: ['POST'] },
-  { regex: /^\/api\/auth\/refresh$/,  methods: ['POST'] },
-  { regex: /^\/api\/auth\/send-code$/, methods: ['POST'] },
+  { regex: /^\/admin\/auth\/login$/,    methods: ['POST'] },
+  { regex: /^\/admin\/auth\/refresh$/,  methods: ['POST'] },
   { regex: /^\/api\/articles$/,       methods: ['GET'] },
   { regex: /^\/api\/rss$/,            methods: ['GET'] },
   { regex: /^\/api\/articles\/\d+$/, methods: ['GET'] },
-  { regex: /^\/api\/avatars\/.+/,   methods: ['GET'] },
   { regex: /^\/api\/images\/.+/,    methods: ['GET'] },
-  { regex: /^\/api\/articles\/\d+\/comments$/, methods: ['GET'] },
 ]
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
