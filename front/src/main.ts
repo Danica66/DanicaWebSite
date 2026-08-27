@@ -1,8 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-// Element Plus 组件已由 unplugin 按需自动引入，这里只保留基础变量样式
-import 'element-plus/theme-chalk/base.css'
-import '@/styles/global.css'
+// Tailwind v4 样式入口（含设计令牌 / 暗色模式 / markdown 内容样式）
+import '@/styles/main.css'
 
 import App from './App.vue'
 import router from './router'

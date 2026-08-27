@@ -22,122 +22,59 @@ const summaryText = (content: string) => {
 
 <template>
   <article
-    :class="['card', { clickable }]"
-    @click="$emit('click', article.id)"
+    class="group glass-card flex items-center p-5 sm:p-6"
+    :class="clickable ? 'glass-card-hover cursor-pointer' : ''"
+    @click="clickable && $emit('click', article.id)"
   >
-    <div class="card-body">
-      <h3 class="card-title" v-html="highlightText(article.title, highlight)"></h3>
-      <p v-if="article.summary || article.content" class="card-summary" v-html="highlightText(article.summary || summaryText(article.content), highlight)"></p>
-      <div class="card-meta">
-        <span v-if="showStatus" :class="['status-badge', article.status]">
+    <div class="min-w-0 flex-1">
+      <!-- 标题（含搜索高亮） -->
+      <h3
+        class="mb-2 text-lg font-semibold leading-snug text-slate-800 dark:text-slate-100"
+        v-html="highlightText(article.title, highlight)"
+      />
+      <!-- 摘要（含搜索高亮） -->
+      <p
+        v-if="article.summary || article.content"
+        class="mb-3 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400"
+        v-html="highlightText(article.summary || summaryText(article.content), highlight)"
+      />
+      <!-- 元信息：状态 / 日期 / 阅读量 -->
+      <div class="flex flex-wrap items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
+        <span v-if="showStatus" :class="['glass-chip', article.status === 'published' ? '!text-emerald-600 dark:!text-emerald-400' : '!text-amber-600 dark:!text-amber-400']">
           {{ statusLabel(article.status) }}
         </span>
-        <span>{{ article.created_at?.slice(0, 10) }}</span>
-        <span>{{ article.view_count || 0 }} 次阅读</span>
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          {{ article.created_at?.slice(0, 10) }}
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          {{ article.view_count || 0 }} 次阅读
+        </span>
       </div>
     </div>
 
-    <span v-if="showArrow" class="card-arrow">→</span>
+    <!-- 右侧箭头 -->
+    <span
+      v-if="showArrow"
+      class="ml-4 shrink-0 text-lg text-slate-300 transition-all group-hover:translate-x-1 group-hover:text-primary dark:text-slate-600"
+    >
+      →
+    </span>
 
-    <div v-if="$slots.actions" class="card-actions" @click.stop>
+    <!-- 操作区插槽（右侧竖排按钮） -->
+    <div
+      v-if="$slots.actions"
+      class="ml-4 flex shrink-0 flex-col justify-center gap-1.5 border-l border-white/60 pl-4 dark:border-white/10"
+      @click.stop
+    >
       <slot name="actions" />
     </div>
   </article>
 </template>
-
-<style scoped>
-.card {
-  display: flex;
-  align-items: center;
-  padding: 20px 24px;
-  background: var(--bg-card);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-}
-.card.clickable {
-  cursor: pointer;
-}
-.card.clickable:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--card-shadow);
-  border-color: var(--primary);
-}
-
-.card-body {
-  flex: 1;
-  min-width: 0;
-}
-.card-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-.card-summary {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.card-title :deep(mark),
-.card-summary :deep(mark) {
-  background: var(--highlight-bg);
-  color: inherit;
-  padding: 0 2px;
-  border-radius: 2px;
-}
-.card-meta {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.status-badge {
-  padding: 1px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-.status-badge.published {
-  background: #e6f7f0;
-  color: #2e7d5b;
-}
-.status-badge.draft {
-  background: #fff3e0;
-  color: #e6a23c;
-}
-
-.card-arrow {
-  font-size: 18px;
-  color: var(--text-muted);
-  padding-left: 16px;
-  transition: color 0.2s;
-  flex-shrink: 0;
-}
-.card:hover .card-arrow {
-  color: var(--primary);
-}
-
-.card-actions {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 12px;
-  border-left: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  .card {
-    padding: 16px 18px;
-  }
-}
-</style>

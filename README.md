@@ -19,7 +19,7 @@
 | 前端框架 | Vue 3（Composition API + `<script setup>`） |
 | 状态管理 | Pinia |
 | 路由 | vue-router |
-| UI 组件库 | Element Plus（front 按需引入，front-manager 全量引入） |
+| UI 组件库 | 主站：无（Tailwind CSS v4 毛玻璃设计系统）；管理台：Element Plus 全量引入 |
 | 构建工具 | Vite |
 | 容器化 | Docker Compose（3 容器 + MySQL，管理台独立 profile） |
 
@@ -74,25 +74,34 @@ DanicaWebSite/
 ├── front/                        # 公开主站（Vite 代理 /api → 3000）
 │   └── src/
 │       ├── main.ts / App.vue
-│       ├── router/index.ts       # 路由 + 导航守卫
-│       ├── stores/
-│       │   ├── auth.ts           # Pinia 认证状态
-│       │   └── theme.ts          # 暗色模式状态（AppLayout 与详情页同步）
-│       ├── api/handleapi.ts      # API 封装
-│       ├── styles/global.css     # 全局样式 + CSS 变量（亮/暗）
+│       ├── router/index.ts       # 路由
+│       ├── styles/main.css       # Tailwind v4 入口：设计令牌 + 暗色变体 + 毛玻璃组件类
+│       ├── stores/theme.ts       # 暗色模式状态（<html class="dark"> 驱动 + localStorage 持久化）
+│       ├── api/
+│       │   ├── index.ts          # axios 实例（baseURL /api）
+│       │   └── article.ts        # 文章接口封装
 │       ├── utils/
 │       │   ├── highlight.ts      # 搜索关键词高亮
-│       │   └── markdown.ts       # Markdown 渲染
-│       ├── giscus/               # 评论区（Giscus 组件）
+│       │   └── markdown.ts       # Markdown 渲染（marked + highlight.js + DOMPurify）
+│       ├── giscus/               # Giscus 评论主题（light/dark，内联 data URL 加载）
 │       ├── components/
-│       │   ├── AppLayout.vue     # 全局布局（导航 + 页脚）
-│       │   ├── ArticleCard.vue   # 文章卡片（含高亮）
-│       │   ├── AuthCard.vue      # 登录表单卡片
-│       │   └── StateTip.vue      # 加载/空/错 通用状态组件
+│       │   ├── AppLayout.vue     # 全局布局（渐变背景 + 导航 + 页脚）
+│       │   ├── AppHeader.vue     # 顶部导航（毛玻璃 + 主题切换）
+│       │   ├── AppFooter.vue     # 页脚（版权 / 备案 / RSS）
+│       │   ├── HeroSection.vue   # 首页全屏 Hero（背景图待配置）
+│       │   ├── ArticleCard.vue   # 文章卡片（毛玻璃 + 关键词高亮）
+│       │   ├── SearchInput.vue   # 搜索输入框
+│       │   ├── Pagination.vue    # 分页器
+│       │   ├── StateTip.vue      # 加载 / 空 / 错 通用状态组件
+│       │   └── Sidebar/
+│       │       ├── SidebarLeft.vue   # 左侧边栏（站长信息 + 社交入口）
+│       │       ├── SidebarRight.vue  # 右侧边栏（标签云 + 音乐播放器）
+│       │       ├── TagCloud.vue      # 标签云（静态占位，待接后端）
+│       │       └── MusicPlayer.vue   # 音乐播放器（占位）
 │       └── views/
-│           ├── Home.vue          # 首页
-│           ├── Articles.vue      # 文章列表（分页 + 搜索）
-│           ├── ArticleDetail.vue # 文章详情 + 评论区
+│           ├── Home.vue          # 首页（Hero + 三列布局 + 分页）
+│           ├── Articles.vue      # 文章列表（单栏 + 搜索 + 分页）
+│           ├── ArticleDetail.vue # 文章详情 + 上一篇/下一篇 + 评论区
 │           └── NotFound.vue      # 404
 │
 └── front-manager/                # 管理后台（Vite 代理 /admin → 3000，Docker profile: admin）
@@ -179,6 +188,7 @@ cd front-manager && npm run dev # 管理台 → http://localhost:5173（与主�
 
 ```bash
 cd back && npm run typecheck        # tsc --noEmit（strict）
+cd front && npm run build           # 含 vue-tsc 类型检查
 cd front-manager && npm run build   # 含 vue-tsc 类型检查
 ```
 
@@ -196,6 +206,7 @@ cd front-manager && npm run build   # 含 vue-tsc 类型检查
 - [x] 响应式布局（桌面 + 移动端）
 - [x] API 分级限流
 - [x] Docker Compose 一键部署（管理台独立 profile）
-- [ ] 文章标签/分类
-- [ ] 添加侧边栏站长信息
+- [x] 主站毛玻璃风格 + Tailwind CSS v4（移除 Element Plus）
+- [x] 主站侧边栏（站长信息 / 标签云占位 / 音乐播放器占位）
+- [ ] 文章标签/分类（后端接口，主站标签云目前为静态占位）
 - [ ] 管理台数据统计（文章数 / 阅读量汇总）

@@ -9,21 +9,21 @@ import StateTip from '@/components/StateTip.vue'
 import { useThemeStore } from '@/stores/theme'
 import lightThemeCss from '@/giscus/light.css?raw'
 import darkThemeCss from '@/giscus/dark.css?raw'
-//init
+
 const route = useRoute()
 const router = useRouter()
 const { isDark } = storeToRefs(useThemeStore())
-//var
+
 const article = ref<any>(null)
 const loading = ref(true)
 const errorMsg = ref('')
-const rendered = computed(() => renderMarkdown(article.value?.content || ''))
-const articleId = ref(0)
 
-//giscus 主题跟随网站主题：把 CSS 转成 data URL 内联。
-//不能直接引 /giscus/light.css —— giscus iframe 在 https://giscus.app 内部加载该 URL，
-//站点是 http 时会被浏览器 mixed-content 拦截；data URL 不发起网络请求，无此问题。
-//注意：btoa 只支持 Latin-1，CSS 含中文等非 ASCII 字符会抛异常，必须先按 UTF-8 编码。
+const rendered = computed(() => renderMarkdown(article.value?.content || ''))
+
+// giscus 主题跟随网站主题：把 CSS 转成 data URL 内联。
+// 不能直接引 /giscus/light.css —— giscus iframe 在 https://giscus.app 内部加载该 URL，
+// 站点是 http 时会被浏览器 mixed-content 拦截；data URL 不发起网络请求，无此问题。
+// 注意：btoa 只支持 Latin-1，CSS 含中文等非 ASCII 字符会抛异常，必须先按 UTF-8 编码。
 const toBase64 = (str: string) => {
   const bytes = new TextEncoder().encode(str)
   let binary = ''
@@ -36,22 +36,23 @@ const giscusTheme = computed(() => {
   return `data:text/css;base64,${toBase64(css)}`
 })
 
-//获取文章
+// 获取文章
 const fetchArticle = async () => {
   const id = Number(route.params.id)
-  if (!id) { 
-    errorMsg.value = '文章 ID 无效'; 
-    loading.value = false; 
-    return 
+  if (!id) {
+    errorMsg.value = '文章 ID 无效'
+    loading.value = false
+    return
   }
-  articleId.value = id
   loading.value = true
   try {
-    const res= await articleApi.getDetail(id)
+    const res = await articleApi.getDetail(id)
     article.value = res.data
   } catch {
     errorMsg.value = '文章加载失败'
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 
 const goBack = () => router.back()
@@ -122,163 +123,148 @@ watch(rendered, () => {
   nextTick(enhanceCodeBlocks)
 })
 
-onMounted(()=>{
-  fetchArticle()
-})
+onMounted(fetchArticle)
 </script>
 
 <template>
-  <!-- 主体 -->
-  <div class="detail">
-    <!-- tip组件 -->
+  <!-- 单栏宽版布局：沉浸式阅读 -->
+  <div class="mx-auto max-w-4xl px-6 py-10">
+    <!-- 返回导航 -->
+    <button
+      type="button"
+      class="mb-6 inline-flex items-center gap-1 text-sm text-slate-500 transition-colors hover:text-primary dark:text-slate-400"
+      @click="goBack"
+    >
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+      返回列表
+    </button>
+
     <StateTip v-if="loading" type="loading" />
-    <!-- 报错返回 -->
-    <div v-else-if="errorMsg" class="state-tip">
-      <p class="error-text">{{ errorMsg }}</p>
-      <el-button class="back-btn" type="primary" plain @click="goBack">返回</el-button>
+
+    <!-- 加载失败 -->
+    <div v-else-if="errorMsg" class="glass-card p-12 text-center">
+      <p class="text-amber-500">{{ errorMsg }}</p>
+      <button
+        type="button"
+        class="mt-5 rounded-full bg-primary px-6 py-2 text-sm text-white shadow-md shadow-primary/30 transition-all hover:bg-primary-dark"
+        @click="goBack"
+      >
+        返回
+      </button>
     </div>
-    <!-- 文章展示 -->
+
     <template v-else-if="article">
-      <!-- 文章标签 -->
-      <article class="article">
-        <header class="article-header">
-          <h1 class="article-title">{{ article.title }}</h1>
-          <div class="article-meta">
-            <span>{{ article.created_at?.slice(0, 10) }}</span>
-            <span>{{ article.view_count || 0 }} 次阅读</span>
+      <!-- 文章主体 -->
+      <article class="glass-card p-6 sm:p-10">
+        <header class="mb-8 border-b border-white/60 pb-6 dark:border-white/10">
+          <h1 class="text-3xl font-bold leading-snug text-slate-900 dark:text-slate-50 sm:text-4xl">
+            {{ article.title }}
+          </h1>
+          <div class="mt-4 flex flex-wrap items-center gap-5 text-sm text-slate-400 dark:text-slate-500">
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+              {{ article.created_at?.slice(0, 10) }}
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {{ article.view_count || 0 }} 次阅读
+            </span>
           </div>
         </header>
 
+        <!-- Markdown 正文 -->
         <div class="article-body markdown-body" v-html="rendered" />
-
-        <div class="article-footer">
-          <div class="footer-actions">
-            <el-button type="primary" plain @click="goBack">← 返回</el-button>
-          </div>
-        </div>
       </article>
 
-      <Giscus
-    repo="Danica66/DanicaWebSite"
-    repoId="R_kgDOTh5CTQ"
-    category="Announcements"
-    categoryId="DIC_kwDOTh5CTc4DC6p-"
-    mapping="pathname"
-    strict="0"
-    reactions-enabled="1"
-    emit-metadata="0"
-    input-position="top"
-    :theme="giscusTheme"
-    lang="zh-CN"
-    loading="lazy"
-    crossorigin="anonymous"
-    async
-  />
+      <!-- Giscus 评论区 -->
+      <div class="glass-card mt-8 p-5 sm:p-6">
+        <Giscus
+          repo="Danica66/DanicaWebSite"
+          repoId="R_kgDOTh5CTQ"
+          category="Announcements"
+          categoryId="DIC_kwDOTh5CTc4DC6p-"
+          mapping="pathname"
+          strict="0"
+          reactions-enabled="1"
+          emit-metadata="0"
+          input-position="top"
+          :theme="giscusTheme"
+          lang="zh-CN"
+          loading="lazy"
+          crossorigin="anonymous"
+          async
+        />
+      </div>
     </template>
-    <!-- tip组件 -->
+
+    <!-- 文章不存在 -->
     <StateTip v-else type="empty" message="文章不存在">
-      <!-- 插槽 -->
       <template #extra>
-        <el-button type="primary" plain @click="goBack">返回</el-button>
+        <button
+          type="button"
+          class="rounded-full border border-white/60 bg-white/50 px-5 py-2 text-sm text-slate-600 backdrop-blur-md transition-all hover:border-primary/50 hover:text-primary dark:border-white/10 dark:bg-white/10 dark:text-slate-300"
+          @click="goBack"
+        >
+          返回
+        </button>
       </template>
     </StateTip>
   </div>
 </template>
 
 <style scoped>
-.detail {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 32px var(--page-padding-x) 120px;
-}
-
-.state-tip {
-  text-align: center;
-  padding: 80px 0;
-  color: var(--text-muted);
-}
-.error-text { color: #e6a23c; }
-.back-btn { margin-top: 16px; }
-
-.article-header {
-  margin-bottom: 32px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
-}
-.article-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.4;
-  margin-bottom: 12px;
-}
-.article-meta {
-  display: flex;
-  gap: 20px;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-.article-body {
-  font-size: 16px;
-  line-height: 2;
-  color: var(--text);
-  word-break: break-word;
-  margin-bottom: 40px;
-}
-/* ===== 代码块增强（:deep 才能命中 JS 注入的 DOM） ===== */
+/* ===== 代码块增强（:deep 才能命中 JS 注入的 DOM） =====
+   这里用普通 CSS 而不是 @apply，避免编辑器 CSS 语言服务对 @apply/@reference 的误报。 */
 .article-body :deep(pre) {
-  position: relative;
-  padding-top: 44px;          /* 顶部留出工具栏的空间 */
+  position: relative; /* 工具栏 absolute 定位的锚点 */
+  padding-top: 3rem;  /* 顶部留出工具栏的空间 */
 }
+
 .article-body :deep(.code-toolbar) {
   position: absolute;
+  inset-inline: 0;
   top: 0;
-  left: 0;
-  right: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 6px 12px;
-  background: #262637;        /* 比代码背景略亮的一层 */
-  border-bottom: 1px solid #33334a;
-  border-radius: 8px 8px 0 0;
-}
-.article-body :deep(.code-lang) {
-  font-size: 12px;
-  color: #8a93a8;
-  text-transform: lowercase;
-}
-.article-body :deep(.code-copy) {
-  font-size: 12px;
-  padding: 2px 10px;
-  border: 1px solid #4a4a66;
-  border-radius: 4px;
-  background: transparent;
-  color: #b8c0d0;
-  cursor: pointer;
-  opacity: 0;                 /* 默认隐藏，悬停代码块时显示 */
-  transition: opacity 0.2s;
-}
-.article-body :deep(pre:hover .code-copy) {
-  opacity: 1;
-}
-.article-body :deep(.code-copy:hover) {
-  background: #3a3a55;
-  color: #fff;
-}
-.article-footer {
-  text-align: center;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-}
-.footer-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
+  justify-content: space-between;
+  padding: 0.375rem 0.75rem;
+  background: #262637; /* 比代码背景略亮的一层 */
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.75rem 0.75rem 0 0;
 }
 
-@media (max-width: 768px) {
-  .article-title { font-size: 22px; }
-  .article-body { font-size: 15px; line-height: 1.8; }
+.article-body :deep(.code-lang) {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: lowercase;
+}
+
+.article-body :deep(.code-copy) {
+  cursor: pointer;
+  padding: 0.125rem 0.625rem;
+  border: 1px solid rgb(100 116 139 / 0.5);
+  border-radius: 0.375rem;
+  background: transparent;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  opacity: 0; /* 默认隐藏，悬停代码块时显示 */
+  transition: all 0.15s;
+}
+
+.article-body :deep(.code-copy:hover) {
+  background: rgb(71 85 105 / 0.5);
+  color: #fff;
+}
+
+.article-body :deep(pre:hover .code-copy) {
+  opacity: 1;
 }
 </style>

@@ -2,20 +2,21 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { articleApi } from '@/api/article'
-import StateTip from '@/components/StateTip.vue'
 import ArticleCard from '@/components/ArticleCard.vue'
-//init
+import StateTip from '@/components/StateTip.vue'
+import SearchInput from '@/components/SearchInput.vue'
+import Pagination from '@/components/Pagination.vue'
+
 const router = useRouter()
-//var
+
 const articles = ref<any[]>([])
 const keyword = ref('')
 const page = ref(1)
 const total = ref(0)
 const loading = ref(false)
 const limit = 10
-//获取文章
+
 const fetchArticles = async () => {
-  //原理同Home.vue->fetchRecent
   loading.value = true
   try {
     const res = await articleApi.getList({ page: page.value, limit, keyword: keyword.value })
@@ -23,93 +24,62 @@ const fetchArticles = async () => {
     total.value = res.data.total || 0
   } catch {
     articles.value = []
-  } finally { 
-    loading.value = false 
+  } finally {
+    loading.value = false
   }
 }
-//搜索
+
+// 搜索：回到第一页重新加载
 const handleSearch = () => {
-    page.value = 1
-    fetchArticles() 
+  page.value = 1
+  fetchArticles()
 }
-//切换页面
+
+// 翻页：滚动到顶部
 const handlePageChange = (newPage: number) => {
-    page.value = newPage
-    fetchArticles()
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  page.value = newPage
+  fetchArticles()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-//跳转
+
 const goDetail = (id: number) => router.push(`/articles/${id}`)
 
-onMounted(() => 
-    fetchArticles()
-)
+onMounted(fetchArticles)
 </script>
 
 <template>
-  <!-- 主体 -->
-  <div class="articles-page">
-    <h2 class="page-title">全部文章</h2>
-
-    <div class="search-bar">
-      <el-input v-model="keyword" placeholder="搜索文章..." clearable class="search-input"
-        @keyup.enter="handleSearch" />
-      <el-button type="primary" @click="handleSearch">搜索</el-button>
+  <!-- 单栏居中布局：无侧边栏，聚焦文章列表 -->
+  <div class="mx-auto max-w-[900px] px-6 py-10">
+    <!-- 标题 + 搜索框（同一行左右分布） -->
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">文章列表</h2>
+      <SearchInput v-model="keyword" @search="handleSearch" />
     </div>
-    <!-- 插槽 -->
+
     <StateTip v-if="loading" type="loading" />
     <StateTip v-else-if="articles.length === 0" type="empty" message="暂无文章" />
-    <!-- 展示文章 -->
-    <div v-else class="article-list">
+
+    <!-- 文章卡片列表 -->
+    <div v-else class="flex flex-col gap-4">
       <ArticleCard
         v-for="item in articles"
         :key="item.id"
         :article="item"
+        clickable
         show-arrow
         :highlight="keyword"
         @click="goDetail"
       />
     </div>
-    <!-- 分页系统 -->
-    <div v-if="total > limit" class="pager">
-      <el-pagination background layout="prev, pager, next"
-        :total="total" :page-size="limit" v-model:current-page="page"
-        @current-change="handlePageChange" />
+
+    <!-- 分页器：底部居中 -->
+    <div v-if="total > limit" class="mt-10">
+      <Pagination
+        :total="total"
+        :page-size="limit"
+        :current-page="page"
+        @change="handlePageChange"
+      />
     </div>
   </div>
 </template>
-
-<style scoped>
-.articles-page {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 32px var(--page-padding-x) 64px;
-}
-.page-title { 
-  font-size: 22px; 
-  font-weight: 600; 
-  color: var(--text); 
-  margin-bottom: 20px; 
-}
-
-.search-bar { 
-  display: flex; 
-  gap: 12px; 
-  margin-bottom: 24px; 
-}
-.search-input { 
-  flex: 1; 
-}
-
-.article-list { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 12px; 
-}
-
-.pager { 
-  display: flex; 
-  justify-content: center; 
-  margin-top: 32px; 
-}
-</style>

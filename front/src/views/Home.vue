@@ -2,25 +2,26 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { articleApi } from '@/api/article'
-import StateTip from '@/components/StateTip.vue'
+import HeroSection from '@/components/HeroSection.vue'
+import SidebarLeft from '@/components/Sidebar/SidebarLeft.vue'
+import SidebarRight from '@/components/Sidebar/SidebarRight.vue'
 import ArticleCard from '@/components/ArticleCard.vue'
-import ProfileCard from '@/components/ProfileCard.vue'
-//init
+import StateTip from '@/components/StateTip.vue'
+
 const router = useRouter()
-//var
-const siteName = import.meta.env.VITE_SITE_NAME || 'Danica'
+
 const articles = ref<any[]>([])
 const loading = ref(false)
-//获取最近文章
+const total = ref(0)
+const limit = 5 // 首页只展示最近 5 篇
+
+// 获取最近文章
 const fetchRecent = async () => {
-  //1.开始加载状态
-  //2.调用接口获取数据
-  //3.若2抛出异常则获取空数据
-  //4.关闭加载状态
   loading.value = true
   try {
-    const res = await articleApi.getList({ page: 1, limit: 5, keyword: '' })
+    const res = await articleApi.getList({ page: 1, limit, keyword: '' })
     articles.value = res.data.list || []
+    total.value = res.data.total || 0
   } catch {
     articles.value = []
   } finally {
@@ -30,116 +31,56 @@ const fetchRecent = async () => {
 
 const goDetail = (id: number) => router.push(`/articles/${id}`)
 
-onMounted(() => 
-    fetchRecent()
-)
+onMounted(fetchRecent)
 </script>
 
 <template>
-  <!-- 主体 -->
-  <div class="home">
-    <!-- 标题栏 -->
-    <section class="banner">
-      <h1>欢迎来到{{ siteName }}的小站</h1>
-      <p>随便发一点学习笔记什么的</p>
-    </section>
-    <div class="home-body">
-      <ProfileCard />
-      <!-- 最近文章 -->
-      <section class="recent">
-        <div class="recent-header">
-          <h2>最新文章</h2>
-          <router-link to="/articles" class="view-all">查看全部 →</router-link>
+  <div>
+    <!-- 全屏 Hero -->
+    <HeroSection />
+
+    <!-- 三列网格：左 240 / 中 1fr / 右 260（随断点收缩） -->
+    <div
+      id="recent"
+      class="mx-auto max-w-6xl scroll-mt-20 px-6 pt-10 pb-16 grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr] lg:grid-cols-[200px_1fr_220px] xl:grid-cols-[240px_1fr_260px]"
+    >
+      <!-- 左侧边栏：个人信息（粘性） -->
+      <div class="md:sticky md:top-20 md:self-start">
+        <SidebarLeft />
+      </div>
+
+      <!-- 主内容区 -->
+      <section class="min-w-0">
+        <div class="mb-5 flex items-baseline justify-between">
+          <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">最新文章</h2>
+          <div class="flex items-baseline gap-4">
+            <span class="text-xs text-slate-400 dark:text-slate-500">共 {{ total }} 篇</span>
+            <router-link to="/articles" class="text-sm text-primary transition-colors hover:underline">
+              查看全部 →
+            </router-link>
+          </div>
         </div>
-        <!-- tip组件 -->
+
         <StateTip v-if="loading" type="loading" />
         <StateTip v-else-if="articles.length === 0" type="empty" message="暂无文章" />
-        <!-- 展示文章 -->
-        <div v-else class="article-list">
+
+        <!-- 只展示最近几篇，不设分页 -->
+        <div v-else class="flex flex-col gap-4">
           <ArticleCard
             v-for="item in articles"
             :key="item.id"
             :article="item"
+            clickable
+            show-arrow
             @click="goDetail"
           />
         </div>
       </section>
+
+      <!-- 右侧边栏：标签云 / 音乐播放器（仅 ≥lg 显示） -->
+      <div class="hidden lg:sticky lg:top-20 lg:block lg:self-start">
+        <SidebarRight />
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.banner {
-  text-align: center;
-  padding: 64px 24px 48px;
-  background: linear-gradient(135deg, #409eff 0%, #6fb3f8 100%);
-  color: #fff;
-  margin-bottom: 40px;
-}
-.banner h1 { 
-  font-size: 32px; 
-  margin-bottom: 12px; 
-  font-weight: 700; 
-}
-.banner p { 
-  font-size: 16px; 
-  opacity: 0.9; 
-}
-
-.recent {
-  min-width: 0; /* 防止 Grid 子项被内容撑破 */
-}
-
-/* 主体两栏布局：左个人信息（240px）+ 右最新文章 */
-.home-body {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 var(--page-padding-x) 64px;
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 24px;
-  align-items: start;
-}
-.recent-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 20px;
-}
-.recent-header h2 { 
-  font-size: 20px; 
-  font-weight: 600; 
-  color: var(--text); 
-}
-.view-all { 
-  font-size: 14px; 
-  color: var(--primary); 
-  text-decoration: none; 
-}
-.view-all:hover { 
-  text-decoration: underline; 
-}
-
-.article-list { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 12px; 
-}
-
-@media (max-width: 768px) {
-  .banner { 
-    padding: 40px 16px 32px; 
-  }
-  .banner h1 { 
-    font-size: 24px; 
-  }
-  .banner p { 
-    font-size: 14px; 
-  }
-  /* 移动端降级为单列：个人信息卡片显示在文章上方 */
-  .home-body {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-}
-</style>
