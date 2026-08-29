@@ -13,11 +13,15 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@shared': fileURLToPath(new URL('../shared', import.meta.url))
     },
   },
   server: {
     host: '0.0.0.0',   // 加这一行，让容器外部能访问
+    fs: {
+      allow: ['..'],  // 允许访问上级目录的 shared/ 共享类型
+    },
     proxy: {
       '/api': {
         // 代理目标后端地址，可用 .env 的 VITE_PROXY_TARGET 覆盖（本地后端不在默认端口时用）

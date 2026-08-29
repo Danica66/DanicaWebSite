@@ -1,7 +1,7 @@
 # API 接口文档
 
 > 本文档依据 `back/` 目录下的实际代码（routes / controllers / service / DAO）整理。
-> 最后核对时间：2026-08-13
+> 最后核对时间：最近一次核对（登录 / 刷新 / 静态资源章节已按当前代码修正）
 
 ## 基础信息
 
@@ -9,7 +9,7 @@
 
 | 前缀 | 用途 | 鉴权 |
 |------|------|------|
-| `/api/*` | 公开接口（文章读取 / 静态资源 / RSS） | 无需 token（`/api/avatars` 除外，见下文） |
+| `/api/*` | 公开接口（文章读取 / 静态资源 / RSS） | 无需 token |
 | `/admin/*` | 管理接口（登录 / 文章管理 / 用户 / 上传） | 除登录、刷新外都需要 `Authorization: Bearer <accesstoken>` |
 
 - 生产基础地址：`https://danicablog.cn`（主站，`/api` 前缀）+ 管理台入口（nginx 转发 `/admin` 到后端，实际端口见部署章节）
@@ -47,7 +47,7 @@
 | `/api/rss` | GET | RSS |
 | `/api/images/.+` | GET | 上传的图片（uploads） |
 
-> ⚠️ 注意：`/api/avatars/.+` **不在**白名单中。头像目录（`public/avatars`）挂在鉴权中间件之后，公开页面（游客无 token）访问头像会返回 401。主站文章若展示作者头像需要留意此点（建议后续把 avatars 加入白名单，或前端带头像接口改为需鉴权）。
+> 头像复用文章图片通道：`users.avatar` 存的是 `/admin/upload` 上传后返回的 `/api/images/xxx` 路径，无独立头像目录。
 
 ### 限流（`middleware/rateLimit.ts`）
 
@@ -83,9 +83,7 @@
   "code": 200,
   "data": {
     "accesstoken": "eyJ...",
-    "refreshtoken": "eyJ...",
     "userId": 13,
-    "username": "danica",
     "is_admin": 1
   },
   "message": "登录成功"
@@ -95,14 +93,11 @@
 - `username` 或 `password` 缺失 → 400 `用户名或密码不能为空`
 - 用户名或密码错误 → 400 `用户名或密码错误`
 - `is_admin`：`1` 管理员，`0` 普通用户
+- `refreshtoken` **不随响应体返回**，由服务端写入 httpOnly Cookie：`Path=/api/refresh`、`SameSite=Lax`、生产环境 `Secure`、有效期 7 天
 
 ### POST /admin/auth/refresh
 
-请求：
-
-```json
-{ "refreshtoken": "eyJ..." }
-```
+请求体为空，`refreshtoken` 从 Cookie 中读取（登录时写入，`Path=/api/refresh`）。
 
 返回：
 
@@ -110,13 +105,15 @@
 { "code": 200, "data": { "accesstoken": "eyJ..." }, "message": "刷新成功" }
 ```
 
-- `refreshtoken` 缺失 → 400 `缺少refreshtoken`
+- Cookie 中无 `refreshtoken` → 400 `缺少refreshtoken`
 - refreshtoken 无效或过期 → 400 `refreshtoken无效或过期,请重新登录`
 
 ### 前端 token 刷新约定（front-manager 现有实现）
 
 - accesstoken 过期后任意请求返回 401，前端自动调 `/auth/refresh` 重试一次（axios 响应拦截器）
 - 刷新失败 → 清空本地登录态并跳转登录页
+
+> ⚠️ 已知问题：登录接口写入的 Cookie `Path` 为 `/api/refresh`，而管理台刷新请求路径是 `/admin/auth/refresh`，二者不匹配，浏览器不会携带该 Cookie，导致自动刷新实际不可用（accesstoken 过期后刷新返回 `缺少refreshtoken`，用户被登出）。修复方向：将 Cookie `Path` 改为 `/` 或 `/admin`。
 
 ---
 
@@ -138,7 +135,7 @@
     "id": 13,
     "username": "danica",
     "email": "danica@example.com",
-    "avatar": "/api/avatars/xxx.jpg",
+    "avatar": "/api/images/xxx.png",
     "email_verified": 0,
     "created_at": "2026-08-05T08:50:08.000Z"
   },
@@ -153,7 +150,7 @@
 请求（`email`、`avatar` 均为可选，传哪个更新哪个）：
 
 ```json
-{ "email": "new@example.com", "avatar": "/api/avatars/xxx.jpg" }
+{ "email": "new@example.com", "avatar": "/api/images/xxx.png" }
 ```
 
 返回：`{ "code": 200, "data": null, "message": "更新用户信息成功" }`
@@ -343,8 +340,7 @@
 
 | 方法 | 路径 | 鉴权 | 说明 |
 |------|------|------|------|
-| GET | `/api/images/:file` | 公开（白名单） | 上传的图片（`express.static('uploads')`） |
-| GET | `/api/avatars/:file` | ⚠️ 需 token | 用户头像（`express.static('public/avatars')`） |
+| GET | `/api/images/:file` | 公开（白名单） | 上传的图片（`express.static('/app/uploads')`），文章配图与用户头像共用 |
 
 - Docker 部署：图片持久化在 `uploads-data` volume（`/app/uploads`），容器重建不丢
 

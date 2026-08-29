@@ -1,4 +1,5 @@
 import axios from 'axios'
+import type { ApiResponse } from '@shared/types'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
 const timeout = parseInt(import.meta.env.VITE_TIMEOUT, 10) || 10000
@@ -13,16 +14,16 @@ instance.interceptors.response.use(
   (err) => Promise.reject(err),
 )
 
-export function Get(url: string, params = {}, config = {}) {
+export function Get<T = unknown>(url: string, params = {}, config = {}): Promise<ApiResponse<T>> {
   return instance.get(url, { params, ...config })
 }
-export function Post(url: string, data = {}, config = {}) {
+export function Post<T = unknown>(url: string, data = {}, config = {}): Promise<ApiResponse<T>> {
   return instance.post(url, data, config)
 }
-export function Put(url: string, data = {}, config = {}) {
+export function Put<T = unknown>(url: string, data = {}, config = {}): Promise<ApiResponse<T>> {
   return instance.put(url, data, config)
 }
-export function Delete(url: string, config = {}) {
+export function Delete<T = unknown>(url: string, config = {}): Promise<ApiResponse<T>> {
   return instance.delete(url, config)
 }
 

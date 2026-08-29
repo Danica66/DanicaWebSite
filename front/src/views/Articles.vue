@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { articleApi } from '@/api/article'
+import type { ArticleListItem } from '@shared/types'
 import ArticleCard from '@/components/ArticleCard.vue'
 import StateTip from '@/components/StateTip.vue'
 import SearchInput from '@/components/SearchInput.vue'
@@ -9,7 +10,7 @@ import Pagination from '@/components/Pagination.vue'
 
 const router = useRouter()
 
-const articles = ref<any[]>([])
+const articles = ref<ArticleListItem[]>([])
 const keyword = ref('')
 const page = ref(1)
 const total = ref(0)

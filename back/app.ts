@@ -7,6 +7,7 @@ import userRoutes from './routes/user'
 import rssRoutes from './routes/rss'
 import articlesmanagerRoutes from './routes/articlesmanagerRoutes'
 import uploadRoutes from './routes/upload'
+import cookieParser from 'cookie-parser'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver, CallowedOrigins } from './config/index'
 import { authLimiter, publicLimiter, globalLimiter } from './middleware/rateLimit'
@@ -17,6 +18,7 @@ const app = express();
 const PORT = Cserver.port
 
 //middleware
+app.use(cookieParser())
 app.use(cors({
   origin: CallowedOrigins.length ? CallowedOrigins : '*',
   credentials: CallowedOrigins.length ? true : false,
@@ -26,8 +28,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(responseWrapper);
 app.use(authMiddleware)
 
+
+//请求日志
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
+
+
 // 静态文件
-app.use('/api/avatars', express.static('public/avatars'))
+app.use('/api/images', express.static('/app/uploads'))
 // 限流
 app.use('/api', globalLimiter)
 // 查看文章
@@ -49,6 +60,7 @@ app.use('/api/rss', rssRoutes)
 app.use((req, res) => {
   res.notFound('接口不存在')
 })
+
 
 //run server
 app.listen(PORT, () => {

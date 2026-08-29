@@ -1,17 +1,25 @@
 import { Request, Response } from 'express'
-import { UserLogin } from '../type/index'
+import { LoginParams } from '../../shared/types'
 import { loginService, refreshService, getProfileService, updateProfileService } from '../service/auth'
 
 
 export const loginController = async (req: Request, res: Response) => {
-    const body:UserLogin=req.body
+    const body:LoginParams=req.body
     const username=body.username
     const password=body.password
     if(!username||!password){
         return res.error('用户名或密码不能为空')
     }
     try {
-        return res.success(await loginService(body), '登录成功')
+        const {accesstoken,refreshtoken,userId,is_admin}=await loginService(body)
+        res.cookie('refreshtoken',refreshtoken,{
+            httpOnly: true,
+            secure:  process.env.NODE_ENV==='production',
+            sameSite:'lax',
+            maxAge: 7*24*60*60*1000,
+            path: '/api/refresh'
+        })
+        return res.success({accesstoken,userId,is_admin}, '登录成功')
     } catch (err: any) {
         console.error('登录失败:', err)
         return res.error(err.message || '登录失败，请稍后重试')
@@ -19,7 +27,7 @@ export const loginController = async (req: Request, res: Response) => {
 }
 
 export const refreshController=async(req:Request,res:Response)=>{
-    const {refreshtoken}=req.body
+    const refreshtoken=req.cookies.refreshtoken
     if(!refreshtoken){
         return res.error('缺少refreshtoken')
     }

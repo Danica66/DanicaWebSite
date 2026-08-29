@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { verifyToken } from '../utils/jwt'
-import { UserPayload } from '../type'
+import { UserPayload } from '../../shared/types'
 
 const PUBLIC_ROUTES = [
   { regex: /^\/admin\/auth\/login$/,    methods: ['POST'] },

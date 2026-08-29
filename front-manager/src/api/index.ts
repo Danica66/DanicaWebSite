@@ -9,6 +9,7 @@ const timeout = parseInt(import.meta.env.VITE_TIMEOUT, 10) || 10000
 const instance = axios.create({
   baseURL,
   timeout,
+  withCredentials: true, //允许携带cookie
 })
 
 instance.interceptors.request.use(

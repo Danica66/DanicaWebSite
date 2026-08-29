@@ -1,8 +1,8 @@
 import db from '../index'
 import { RowDataPacket } from 'mysql2'
-import { UserLogin, UserProfile } from '../../type/index'
+import { LoginParams, UserProfileUpdate } from '../../../shared/types'
 //查找用户
-export const select_username=(user: UserLogin): Promise<RowDataPacket[]> =>{
+export const select_username=(user: LoginParams): Promise<RowDataPacket[]> =>{
     return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM users WHERE username = ?'
     db.query(sql, [user.username], (err, result: RowDataPacket[]) => {
@@ -28,7 +28,7 @@ export const select_user_by_id =(id: number): Promise<RowDataPacket[]>=>{
   })
 }
 // 更新用户资料（只更新传入的字段）
-export const update_user =(id: number, profile: UserProfile): Promise<RowDataPacket[]>=>{
+export const update_user =(id: number, profile: UserProfileUpdate): Promise<RowDataPacket[]>=>{
   return new Promise((resolve, reject) => {
     const sets: string[] = []
     const params: any[] = []

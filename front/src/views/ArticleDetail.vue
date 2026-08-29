@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { renderMarkdown } from '@/utils/markdown'
 import { articleApi } from '@/api/article'
+import type { ArticleDetail } from '@shared/types'
 import Giscus from '@giscus/vue'
 import StateTip from '@/components/StateTip.vue'
 import { useThemeStore } from '@/stores/theme'
@@ -14,7 +15,7 @@ const route = useRoute()
 const router = useRouter()
 const { isDark } = storeToRefs(useThemeStore())
 
-const article = ref<any>(null)
+const article = ref<ArticleDetail | null>(null)
 const loading = ref(true)
 const errorMsg = ref('')
 

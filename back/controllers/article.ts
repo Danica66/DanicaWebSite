@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { getSingleArticleService,getArticleListService,updateArticleService,deleteArticleService,releaseArticleService} from "../service/article"
-import { Article, Articlestatus } from "../type"
+import { Article, ArticleStatus } from "../../shared/types"
 //公共接口controller
 export const getArticleListController=async (req:Request,res:Response)=>{
     const page = parseInt(req.query.page as string)
@@ -24,7 +24,7 @@ export const getArticleListManagerController=async (req:Request,res:Response)=>{
     const page = parseInt(req.query.page as string)
     const limit = parseInt(req.query.limit as string)
     const keyword = req.query.keyword as string
-    const status=req.query.status as Articlestatus
+    const status=req.query.status as ArticleStatus
     if (!page || page < 1) {
         return res.error('page 必须 >= 1')
     }
@@ -81,7 +81,7 @@ export const updateArticleController=async(req:Request,res:Response)=>{
         return res.error('缺少文章标题或内容')
     }
     try {
-        return res.success(await updateArticleService(req.user.userId,id,article),`id:${id}更新文章成功`)
+        return res.success(await updateArticleService(id,article),`id:${id}更新文章成功`)
     } catch (err: any) {
         console.error('id更新文章失败:', err)
         return res.error(err.message || 'id更新文章失败', 1, 500)
@@ -93,7 +93,7 @@ export const deleteArticleController=async(req:Request,res:Response)=>{
         return res.error('缺少文章 ID')
     }
     try {
-        return res.success(await deleteArticleService(req.user.userId,id),`id:${id}删除文章成功`)
+        return res.success(await deleteArticleService(id),`id:${id}删除文章成功`)
     } catch (err: any) {
         console.error('id删除文章失败:', err)
         return res.error(err.message || 'id删除文章失败', 1, 500)

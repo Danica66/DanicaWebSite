@@ -12,7 +12,7 @@
 | 语言 | TypeScript |
 | 后端框架 | Express 5（ESM，tsx 运行） |
 | 数据库 | MySQL 8.0（`mysql2` 连接池，原生 SQL） |
-| 身份认证 | JWT（accessToken 1h + refreshToken 7d，401 自动刷新） |
+| 身份认证 | JWT（accessToken 1h + refreshToken 7d 存 httpOnly Cookie，401 自动刷新） |
 | 密码加密 | bcryptjs（10 轮） |
 | 评论服务 | Giscus |
 | 限流 | 自定义限流器（分级：auth / article / global） |
@@ -30,101 +30,106 @@
 ```
 DanicaWebSite/
 ├── sql/                          # 数据库脚本
-│   └── my_website.sql            # 建表 DDL（首次启动自动执行）
-├── API_Document.md               # API 接口文档（/api 公开 + /admin 管理双前缀）
+│   └── my_website.sql            # 建表 DDL
+├── API_Document.md               # API 接口文档
 ├── README.md                     # 本文件
-├── docker-compose.yml            # 部署配置（db / back / front / manager）
-├── docker-compose.example.yml    # 部署配置模板（占位密码）
+├── docker-compose.yml            # 部署配置
+├── docker-compose.example.yml    # 部署配置模板
+├── shared/
+│   └── types.ts                  # 前后端共享的 API 契约类型
 │
 ├── back/                         # 后端（端口 3000）
 │   ├── app.ts                    # 入口：CORS / 响应包装 / JWT 鉴权 / 路由注册
-│   ├── config/index.ts           # 环境变量（dotenv）
+│   ├── config/index.ts           # 环境变量
 │   ├── type/index.ts             # TypeScript 类型定义
 │   ├── database/
 │   │   ├── index.ts              # MySQL2 连接池
 │   │   └── DAO/
 │   │       ├── auth.ts           # 用户数据访问
-│   │       └── article.ts        # 文章数据访问（含阅读数 / RSS）
+│   │       └── article.ts        # 文章数据访问
 │   ├── service/
-│   │   ├── auth.ts               # 认证业务逻辑（登录/刷新/资料）
-│   │   └── article.ts            # 文章业务逻辑（列表/详情/增删改）
+│   │   ├── auth.ts               # 认证业务逻辑
+│   │   └── article.ts            # 文章业务逻辑
 │   ├── controllers/
 │   │   ├── auth.ts               # 登录/刷新/个人资料
-│   │   ├── article.ts            # 文章 CRUD（公开 + 管理双入口）
-│   │   ├── upload.ts             # 图片上传（multer，限制 5MB）
+│   │   ├── article.ts            # 文章 CRUD
+│   │   ├── upload.ts             # 图片上传
 │   │   └── rss.ts                # RSS 订阅源
 │   ├── routes/
-│   │   ├── auth.ts               # POST /login /refresh（挂载于 /admin/auth）
-│   │   ├── articles.ts           # 公开文章路由（挂载于 /api/articles）
-│   │   ├── articlesmanagerRoutes.ts  # 管理文章路由（挂载于 /admin/articles）
-│   │   ├── user.ts               # 用户资料路由（挂载于 /admin/user）
-│   │   ├── upload.ts             # 图片上传路由（挂载于 /admin/upload）
-│   │   └── rss.ts                # RSS 路由（挂载于 /api/rss）
+│   │   ├── auth.ts               # POST /login /refresh
+│   │   ├── articles.ts           # 公开文章路由
+│   │   ├── articlesmanagerRoutes.ts  # 管理文章路由）
+│   │   ├── user.ts               # 用户资料路由
+│   │   ├── upload.ts             # 图片上传路由
+│   │   └── rss.ts                # RSS 路由
 │   ├── middleware/
 │   │   ├── auth.ts               # JWT 鉴权 + 公开白名单
-│   │   ├── response.ts           # 统一响应格式（res.success / res.error）
+│   │   ├── response.ts           # 统一响应格式
 │   │   └── rateLimit.ts          # 分级限流配置
 │   ├── utils/
 │   │   ├── jwt.ts                # JWT 签发/验证
 │   │   ├── bcrypt.ts             # 密码哈希
 │   │   ├── response.ts           # JSON 响应工具
 │   │   └── rateLimit.ts          # 限流器工厂
-│   └── tsconfig.json             # strict 类型检查（npm run typecheck）
+│   └── tsconfig.json             # strict 类型检查
 │
-├── front/                        # 公开主站（Vite 代理 /api → 3000）
+├── front/                        # 公开主站
 │   └── src/
 │       ├── main.ts / App.vue
 │       ├── router/index.ts       # 路由
-│       ├── styles/main.css       # Tailwind v4 入口：设计令牌 + 暗色变体 + 毛玻璃组件类
-│       ├── stores/theme.ts       # 暗色模式状态（<html class="dark"> 驱动 + localStorage 持久化）
+│       ├── styles/main.css       # Tailwind v4
+│       ├── stores/theme.ts       # pinia
 │       ├── api/
-│       │   ├── index.ts          # axios 实例（baseURL /api）
+│       │   ├── index.ts          # axios 
 │       │   └── article.ts        # 文章接口封装
 │       ├── utils/
 │       │   ├── highlight.ts      # 搜索关键词高亮
-│       │   └── markdown.ts       # Markdown 渲染（marked + highlight.js + DOMPurify）
-│       ├── giscus/               # Giscus 评论主题（light/dark，内联 data URL 加载）
+│       │   └── markdown.ts       # Markdown 渲染
+│       ├── giscus/               # Giscus 评论主题
 │       ├── components/
-│       │   ├── AppLayout.vue     # 全局布局（渐变背景 + 导航 + 页脚）
-│       │   ├── AppHeader.vue     # 顶部导航（毛玻璃 + 主题切换）
-│       │   ├── AppFooter.vue     # 页脚（版权 / 备案 / RSS）
-│       │   ├── HeroSection.vue   # 首页全屏 Hero（背景图待配置）
-│       │   ├── ArticleCard.vue   # 文章卡片（毛玻璃 + 关键词高亮）
+│       │   ├── AppLayout.vue     # 全局布局
+│       │   ├── AppHeader.vue     # 顶部导航
+│       │   ├── AppFooter.vue     # 页脚
+│       │   ├── HeroSection.vue   # 首页全屏 Hero
+│       │   ├── ArticleCard.vue   # 文章卡片
 │       │   ├── SearchInput.vue   # 搜索输入框
 │       │   ├── Pagination.vue    # 分页器
 │       │   ├── StateTip.vue      # 加载 / 空 / 错 通用状态组件
 │       │   └── Sidebar/
-│       │       ├── SidebarLeft.vue   # 左侧边栏（站长信息 + 社交入口）
-│       │       ├── SidebarRight.vue  # 右侧边栏（标签云 + 音乐播放器）
-│       │       ├── TagCloud.vue      # 标签云（静态占位，待接后端）
-│       │       └── MusicPlayer.vue   # 音乐播放器（占位）
+│       │       ├── SidebarLeft.vue   # 左侧边栏
+│       │       ├── SidebarRight.vue  # 右侧边栏
+│       │       ├── TagCloud.vue      # 标签云(后端未实现)
+│       │       └── MusicPlayer.vue   # 音乐播放器(后端未实现)
 │       └── views/
-│           ├── Home.vue          # 首页（Hero + 三列布局 + 分页）
-│           ├── Articles.vue      # 文章列表（单栏 + 搜索 + 分页）
+│           ├── Home.vue          # 首页
+│           ├── Articles.vue      # 文章列表
 │           ├── ArticleDetail.vue # 文章详情 + 上一篇/下一篇 + 评论区
 │           └── NotFound.vue      # 404
 │
-└── front-manager/                # 管理后台（Vite 代理 /admin → 3000，Docker profile: admin）
+└── front-manager/                # 管理后台
     └── src/
         ├── main.ts / App.vue
-        ├── router/index.ts       # /login + 需登录的布局路由（导航守卫）
+        ├── router/index.ts       # /login + 需登录的布局路由
         ├── stores/auth.ts        # Pinia 认证 + token 持久化
         ├── api/
-        │   ├── index.ts          # axios 实例（baseURL /admin、401 自动刷新）
-        │   └── handleapi.ts      # authApi / articleApi / userApi / uploadApi
-        ├── types/index.ts        # 文章/认证/用户类型定义
-        ├── styles/global.css     # 全局样式 + CSS 变量（亮/暗）
+        │   ├── index.ts          # axios 
+        │   └── handleapi.ts      
+        ├── types/index.ts        # 类型
+        ├── utils/
+        │   ├── highlight.ts      # 搜索关键词高亮
+        │   └── markdown.ts       # Markdown 渲染
+        ├── styles/global.css     # 全局样式 + CSS 变量
         ├── components/
-        │   ├── AppLayout.vue     # 侧边导航（文章管理）
-        │   ├── AppHeaderFooter.vue  # 顶部导航（主题切换 + 退出登录）
-        │   ├── ArticleEdit.vue   # 文章编辑表单（写文章页 + 编辑弹窗复用）
+        │   ├── AppLayout.vue     # 侧边导航
+        │   ├── AppHeaderFooter.vue  # 顶部导航
+        │   ├── ArticleEdit.vue   # 文章编辑表单
         │   ├── ArticleCard.vue   # 文章卡片
         │   └── AuthCard.vue      # 登录表单卡片
         └── views/
             ├── Login.vue         # 管理员登录
-            ├── Home.vue          # 主页（欢迎页）
-            ├── Articles.vue      # 文章管理（列表/搜索/编辑弹窗/删除）
-            ├── ArticleEditor.vue # 写文章（Markdown + 粘贴图片自动上传）
+            ├── Home.vue          # 主页
+            ├── Articles.vue      # 文章管理
+            ├── ArticleEditor.vue # 写文章
             └── NotFound.vue      # 404
 ```
 
@@ -148,10 +153,15 @@ DanicaWebSite/
 cp docker-compose.example.yml docker-compose.yml
 # 编辑 docker-compose.yml：
 #   1. 修改 DB_PASSWORD / JWT_SECRET / REFRESH_SECRET / SITE_URL / ALLOWED_ORIGINS 等
-#   2. 证书：front/ssl 与 front-manager/ssl 需放好 fullchain.pem / privkey.pem
+#      （RESEND_API_KEY / MAIL_* 为历史残留变量，后端未使用，可删除）
+#   2. 证书：front/ssl 与 front-manager/ssl 已放好 fullchain.pem / privkey.pem
+#      （源文件在 danicablog.cn_nginx/，更换域名时同步替换）
 docker compose up -d
 # 管理后台（独立 profile，可选）
 docker compose --profile admin up -d
+
+# 可选：构建并推送镜像到 Docker Hub（根目录脚本）
+npm run docker
 ```
 
 端口分配：
@@ -160,7 +170,7 @@ docker compose --profile admin up -d
 |------|------|------|
 | front（主站） | 80 / 443 | HTTP / HTTPS |
 | manager（管理台） | 8080 / 8443 | HTTP / HTTPS（需 `--profile admin`） |
-| back（后端） | 3000 | 仅容器内访问（nginx 反向代理） |
+| back（后端） | 3000 | 暴露到宿主机（nginx 容器内亦通过 back:3000 反代） |
 | db（MySQL） | 3307 → 3306 | 宿主机 3307 |
 
 > 管理台 API 通过 nginx `location /admin/` 转发到后端，**不经过主站**。
@@ -169,20 +179,21 @@ docker compose --profile admin up -d
 ### 方式 2：本地开发
 
 ```bash
-# 安装依赖（根目录 + front + back + front-manager）
-npm install
-cd front && npm install
-cd ../back && npm install
-cd ../front-manager && npm install
+# 安装全部依赖（根 + front + back + front-manager）
+npm run install:all
 
-# 启动（三端并行，各自终端运行）
-cd back && npm run dev          # 后端 → http://localhost:3000
-cd front && npm run dev         # 主站 → http://localhost:5173
-cd front-manager && npm run dev # 管理台 → http://localhost:5173（与主站端口冲突时 Vite 自动顺延 5174）
+# 并行启动 后端 + 主站（后端 3000 / 主站 5173）
+npm run dev
+
+# 并行启动 后端 + 管理台（管理台 5173，与主站端口冲突时自动顺延 5174）
+npm run test
+
+# 也可分别单独启动：npm run dev:node / dev:vue / dev:manage
 ```
 
+- 根目录 `npm run dev` 用 concurrently 同时启动后端与主站；`npm run test` 启动后端与管理台
 - front 的 Vite 自动代理 `/api` → 3000；front-manager 的 Vite 自动代理 `/admin` → 3000
-- 后端需要 `.env`（数据库连接、JWT 密钥等，参考 docker-compose 环境变量）
+- 后端需要 `back/.env`（参考 `back/.env.example`：数据库连接、JWT 密钥、CORS、站点信息等；本地连 Docker MySQL 时 `DB_HOST=host.docker.internal`）
 
 ### 类型检查
 
@@ -196,7 +207,7 @@ cd front-manager && npm run build   # 含 vue-tsc 类型检查
 
 ## 功能清单
 
-- [x] JWT 双 Token 鉴权 + 401 自动刷新
+- [x] JWT 双 Token 鉴权 + 401 自动刷新（refreshToken 存 httpOnly Cookie）
 - [x] 管理台登录 / 退出登录
 - [x] 文章 CRUD（草稿 / 发布，仅作者可编辑/删除）
 - [x] 文章搜索（MySQL FULLTEXT + 前端关键词高亮）

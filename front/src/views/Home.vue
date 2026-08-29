@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { articleApi } from '@/api/article'
+import type { ArticleListItem } from '@shared/types'
 import HeroSection from '@/components/HeroSection.vue'
 import SidebarLeft from '@/components/Sidebar/SidebarLeft.vue'
 import SidebarRight from '@/components/Sidebar/SidebarRight.vue'
@@ -10,7 +11,7 @@ import StateTip from '@/components/StateTip.vue'
 
 const router = useRouter()
 
-const articles = ref<any[]>([])
+const articles = ref<ArticleListItem[]>([])
 const loading = ref(false)
 const total = ref(0)
 const limit = 5 // 首页只展示最近 5 篇

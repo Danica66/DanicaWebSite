@@ -1,3 +1,5 @@
+import { UserPayload } from '../../shared/types'
+
 declare global {
   namespace Express {
     //req加入user属性
@@ -15,45 +17,4 @@ declare global {
       badRequest: (message: string) => Response//400
     }
   }
-}
-
-//user接口(类型)
-export interface UserPayload {
-  userId: number
-}
-//login
-export interface UserLogin {
-  username: string
-  email?: string
-  password: string
-}
-export interface UserProfile {
-  email?: string
-  avatar?: string
-}
-//article
-export type Articlestatus= 'draft' | 'published'
-export interface Article {
-  id?: number
-  title: string
-  status?: Articlestatus
-  content: string
-  summary?: string
-  cover_image?: string
-  author_id: number
-  view_count?: number
-  created_at?: Date
-  updated_at?: Date
-}
-//comment
-export interface Comment {
-  id?: number
-  article_id: number
-  user_id: number
-  parent_id: number | null
-  content: string
-  created_at?: string
-  updated_at?: string
-  username?: string
-  avatar?: string
 }

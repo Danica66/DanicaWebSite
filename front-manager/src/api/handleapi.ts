@@ -6,8 +6,8 @@ export const authApi = {
   login(data: LoginParams) {
     return api.Post<LoginResult>('/auth/login', data);
   },
-  refresh(data: { refreshtoken: string }) {
-    return api.Post<RefreshResult>('/auth/refresh', data);
+  refresh() {
+    return api.Post<RefreshResult>('/auth/refresh');
   },
 }
 

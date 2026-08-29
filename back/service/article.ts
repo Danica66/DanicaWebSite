@@ -1,6 +1,6 @@
-import { select_article,select_article_count,select_articlebyid,select_article_userid,insert_article,delete_articlebyid,update_article_viewcount,update_article} from "../database/DAO/article"
-import { Article, Articlestatus } from "../type"
-export const getArticleListService=async (page:number,limit:number,keyword:string,status:Articlestatus='published')=>{
+import { select_article,select_article_count,select_articlebyid,insert_article,delete_articlebyid,update_article_viewcount,update_article} from "../database/DAO/article"
+import { Article, ArticleStatus } from "../../shared/types"
+export const getArticleListService=async (page:number,limit:number,keyword:string,status:ArticleStatus='published')=>{
     const [list, countResult] = await Promise.all([
         select_article(page, limit, keyword,status),
         select_article_count(keyword,status),
@@ -16,23 +16,18 @@ export const getSingleArticleService=async(id:number, countView: boolean = true)
 export const releaseArticleService=async(article:Article)=>{
     return await insert_article(article)
 }
-export const updateArticleService=async(userId:number,id:number,article:Article)=>{
-    const row=await select_article_userid(id)
+export const updateArticleService=async(id:number,article:Article)=>{
+    const row=await select_articlebyid(id)
     if(row.length===0){
         throw new Error('文章不存在')
     }
-    if(userId!==row[0].author_id){
-        throw new Error('无权限操作')
-    }
+
     return await update_article(article,id)
 }
-export const deleteArticleService=async(userId:number,id:number)=>{
-    const row=await select_article_userid(id)
+export const deleteArticleService=async(id:number)=>{
+    const row=await select_articlebyid(id)
     if(row.length===0){
         throw new Error('文章不存在')
-    }
-    if(userId!==row[0].author_id){
-        throw new Error('无权限操作')
     }
     return await delete_articlebyid(id)
 }
