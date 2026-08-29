@@ -9,6 +9,9 @@ export const authApi = {
   refresh() {
     return api.Post<RefreshResult>('/auth/refresh');
   },
+  logout() {
+    return api.Post<ApiResponse<unknown>>('/auth/logout');
+  },
 }
 
 export const articleApi = {

@@ -17,7 +17,7 @@ export const loginController = async (req: Request, res: Response) => {
             secure:  process.env.NODE_ENV==='production',
             sameSite:'lax',
             maxAge: 7*24*60*60*1000,
-            path: '/api/refresh'
+            path: '/admin'
         })
         return res.success({accesstoken,userId,is_admin}, '登录成功')
     } catch (err: any) {
@@ -37,6 +37,16 @@ export const refreshController=async(req:Request,res:Response)=>{
         console.error('刷新失败:', err)
         return res.error(err.message || '刷新失败，请稍后重试')
     }
+}
+export const logoutController=async(req:Request,res:Response)=>{
+    // 清除 cookie 时 Path 必须与设置时一致（RFC 6265 §3.1），否则浏览器不会删除
+    res.clearCookie('refreshtoken',{
+        httpOnly: true,
+        secure:  process.env.NODE_ENV==='production',
+        sameSite:'lax',
+        path: '/admin'
+    })
+    return res.success(null, '退出登录成功')
 }
 export const getProfileController=async(req:Request,res:Response)=>{
     try {

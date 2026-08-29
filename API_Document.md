@@ -220,13 +220,13 @@
 }
 ```
 
-**阅读数控制（重要）**：默认每次请求 `view_count + 1`。管理台查看/编辑时请带上参数：
+**阅读数控制（重要）**：公开详情 `/api/articles/:id` **一律增加** `view_count`（强制计数，携带 `noCount` 参数也无效）；仅管理端 `/admin/articles/:id` 支持 `?noCount=1` 跳过计数（编辑/预览不污染数据）：
 
 | 参数 | 类型 | 说明 |
 |------|------|------|
-| `noCount` | string | `noCount=1` 时不增加阅读数（管理台专用） |
+| `noCount` | string | 仅管理端有效：`noCount=1` 时不增加阅读数 |
 
-示例：`GET /api/articles/1?noCount=1`
+示例：`GET /admin/articles/1?noCount=1`（需登录）
 
 > 不返回作者信息（`username` / `avatar`），如需展示作者请走 `/admin/user/profile` 或扩展接口。
 

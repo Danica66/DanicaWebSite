@@ -34,10 +34,12 @@ export const useauthStore = defineStore('userLogin', () => {
   }
 
   const logout = () => {
+    // 先清本地状态，再异步通知后端删 cookie；后端不可达时登出也不应阻塞
     accesstoken.value = ''
     user.value = null
     localStorage.removeItem(localstorageKey.accesstoken)
     localStorage.removeItem(localstorageKey.user)
+    authApi.logout().catch(() => {})
   }
 
   return {

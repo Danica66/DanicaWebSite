@@ -38,13 +38,26 @@ export const getArticleListManagerController=async (req:Request,res:Response)=>{
         return res.error(err.message || '获取文章失败', 1, 500)
     }
 }
+//公开详情controller:一律计入阅读数(管理端才允许通过 ?noCount=1 跳过计数)
+export const getPublicArticleController=async(req:Request,res:Response)=>{
+    const id = parseInt(req.params.id as string)
+    if (!id) {
+        return res.error('缺少文章 ID')
+    }
+    try {
+        return res.success(await getSingleArticleService(id, true),`id:${id}查找文章成功`)
+    } catch (err: any) {
+        console.error('id查找文章失败:', err)
+        return res.error(err.message || 'id查找文章失败', 1, 500)
+    }
+}
 export const getSingleArticleController=async(req:Request,res:Response)=>{
     const id = parseInt(req.params.id as string)
     if (!id) {
         return res.error('缺少文章 ID')
     }
     try {
-        // 管理台编辑/预览请求带 ?noCount=1，不计入阅读数
+        // 管理台编辑/预览请求带 ?noCount=1，不计入阅读数（仅管理路由 /admin/articles/:id 使用此 controller）
         const countView = req.query.noCount !== '1'
         return res.success(await getSingleArticleService(id, countView),`id:${id}查找文章成功`)
     } catch (err: any) {

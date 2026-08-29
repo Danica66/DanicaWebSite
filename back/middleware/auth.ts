@@ -5,6 +5,7 @@ import { UserPayload } from '../../shared/types'
 const PUBLIC_ROUTES = [
   { regex: /^\/admin\/auth\/login$/,    methods: ['POST'] },
   { regex: /^\/admin\/auth\/refresh$/,  methods: ['POST'] },
+  { regex: /^\/admin\/auth\/logout$/,   methods: ['POST'] },
   { regex: /^\/api\/articles$/,       methods: ['GET'] },
   { regex: /^\/api\/rss$/,            methods: ['GET'] },
   { regex: /^\/api\/articles\/\d+$/, methods: ['GET'] },

@@ -6,7 +6,7 @@
     "dev:node": "cd back && npm run dev",
     "dev:vue": "cd front && npm run dev",
     "dev:manage": "cd front-manager && npm run dev",
-    "docker": "docker login && docker compose --profile admin build && docker compose --profile admin push"
+    "docker": "docker compose --profile admin build && docker compose --profile admin push"
   },
   "dependencies": {
     "concurrently": "^10.0.4"
