@@ -1,7 +1,7 @@
 # API 接口文档
 
 > 本文档依据 `back/` 目录下的实际代码（routes / controllers / service / DAO）整理。
-> 最后核对时间：最近一次核对（登录 / 刷新 / 静态资源章节已按当前代码修正）
+> 最后核对时间：最近一次核对（已补登出白名单、修正静态目录与列表返回字段）
 
 ## 基础信息
 
@@ -42,6 +42,7 @@
 |----------|------|------|
 | `/admin/auth/login` | POST | 登录 |
 | `/admin/auth/refresh` | POST | 刷新 token |
+| `/admin/auth/logout` | POST | 登出（无需 token，便于清除 Cookie 与黑名单） |
 | `/api/articles` | GET | 公开文章列表 |
 | `/api/articles/:id` | GET | 公开文章详情 |
 | `/api/rss` | GET | RSS |
@@ -65,8 +66,9 @@
 
 | 方法 | 路径 | 限流 | 说明 |
 |------|------|------|------|
-| POST | `/admin/auth/login` | 1分/5次 | 登录，返回 accesstoken + refreshtoken + 用户信息 |
+| POST | `/admin/auth/login` | 1分/5次 | 登录，返回 accesstoken + 用户信息（refreshtoken 走 httpOnly Cookie） |
 | POST | `/admin/auth/refresh` | 1分/5次 | 用 refreshtoken 换取新的 accesstoken |
+| POST | `/admin/auth/logout` | 1分/5次 | 登出，清除 Cookie + access token 进黑名单 + 移除 refresh 会话 |
 
 ### POST /admin/auth/login
 
@@ -93,11 +95,11 @@
 - `username` 或 `password` 缺失 → 400 `用户名或密码不能为空`
 - 用户名或密码错误 → 400 `用户名或密码错误`
 - `is_admin`：`1` 管理员，`0` 普通用户
-- `refreshtoken` **不随响应体返回**，由服务端写入 httpOnly Cookie：`Path=/api/refresh`、`SameSite=Lax`、生产环境 `Secure`、有效期 7 天
+- `refreshtoken` **不随响应体返回**，由服务端写入 httpOnly Cookie：`Path=/admin`、`SameSite=Lax`、生产环境 `Secure`、有效期 7 天
 
 ### POST /admin/auth/refresh
 
-请求体为空，`refreshtoken` 从 Cookie 中读取（登录时写入，`Path=/api/refresh`）。
+请求体为空，`refreshtoken` 从 Cookie 中读取（登录时写入，`Path=/admin`）。
 
 返回：
 
@@ -107,13 +109,26 @@
 
 - Cookie 中无 `refreshtoken` → 400 `缺少refreshtoken`
 - refreshtoken 无效或过期 → 400 `refreshtoken无效或过期,请重新登录`
+- refreshtoken 已被轮换/注销（不在白名单）→ 400 `refresh token 已失效，请重新登录`
+- 轮换：每次刷新都签发新 refreshtoken 并写回 Cookie（配置与登录一致），旧 token 立即失效，每个 refresh token 只能用一次
+
+### POST /admin/auth/logout
+
+请求体为空；`accesstoken` 从 `Authorization` 头读取（缺失也允许登出），`refreshtoken` 从 Cookie 读取。
+
+返回：`{ "code": 200, "data": null, "message": "退出登录成功" }`
+
+- 清除 `refreshtoken` Cookie
+- access token 写入 Redis 黑名单（TTL = 剩余寿命），登出后立即失效
+- 从 Redis 白名单移除该 refresh 会话，登出后不能再换取新 token
 
 ### 前端 token 刷新约定（front-manager 现有实现）
 
 - accesstoken 过期后任意请求返回 401，前端自动调 `/auth/refresh` 重试一次（axios 响应拦截器）
 - 刷新失败 → 清空本地登录态并跳转登录页
 
-> ⚠️ 已知问题：登录接口写入的 Cookie `Path` 为 `/api/refresh`，而管理台刷新请求路径是 `/admin/auth/refresh`，二者不匹配，浏览器不会携带该 Cookie，导致自动刷新实际不可用（accesstoken 过期后刷新返回 `缺少refreshtoken`，用户被登出）。修复方向：将 Cookie `Path` 改为 `/` 或 `/admin`。
+> Cookie 约定：`refreshtoken` 写入 httpOnly Cookie，`Path=/admin`、`SameSite=Lax`、生产环境 `Secure`、7 天有效；登录 / 刷新 / 登出三处保持一致。
+> 服务端失效机制（Redis）：access token 登出后进黑名单立即失效；refresh token 走白名单 + 轮换，每个 token 只能用一次。
 
 ---
 
@@ -294,7 +309,7 @@
 - `status` 非 `"published"`（含不传）一律存为 `draft`
 - `author_id` 取自 token，前端无需传
 
-返回：`{ "code": 200, "data": [插入结果], "message": "发布文章成功" }`
+返回：`{ "code": 200, "data": { "affectedRows": 1, "insertId": 12 }, "message": "发布文章成功" }`
 
 ### PUT /admin/articles/:id
 
@@ -340,9 +355,10 @@
 
 | 方法 | 路径 | 鉴权 | 说明 |
 |------|------|------|------|
-| GET | `/api/images/:file` | 公开（白名单） | 上传的图片（`express.static('/app/uploads')`），文章配图与用户头像共用 |
+| GET | `/api/images/:file` | 公开（白名单） | 上传的图片（`express.static(path.resolve(process.cwd(), 'uploads'))`），文章配图与用户头像共用 |
 
-- Docker 部署：图片持久化在 `uploads-data` volume（`/app/uploads`），容器重建不丢
+- 目录由 `path.resolve(process.cwd(), 'uploads')` 解析：本地开发即 `back/uploads/`；Docker（`WORKDIR=/app`）即 `/app/uploads`（挂载 `uploads-data` volume，容器重建不丢）
+- 与上传落盘目录（`controllers/upload.ts` 的 `UPLOAD_DIR`）保持一致
 
 ---
 

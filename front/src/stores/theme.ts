@@ -7,14 +7,9 @@ import { ref } from 'vue'
 export const useThemeStore = defineStore('theme', () => {
   const isDark = ref(false)
 
-  // 只读取网站自己持久化的主题，没有记录则默认亮色
-  function readStoredTheme(): boolean {
-    return localStorage.getItem('theme') === 'dark'
-  }
-
-  // 挂载时初始化一次（幂等）
+  // 挂载时初始化一次（幂等）：只读取网站自己持久化的主题，没有记录则默认亮色
   function initTheme() {
-    isDark.value = readStoredTheme()
+    isDark.value = localStorage.getItem('theme') === 'dark'
     document.documentElement.classList.toggle('dark', isDark.value)
   }
 

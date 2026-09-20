@@ -1,6 +1,7 @@
 import { Request,Response } from "express"
 import { getSingleArticleService,getArticleListService,updateArticleService,deleteArticleService,releaseArticleService} from "../service/article"
 import { Article, ArticleStatus } from "../../shared/types"
+import { clearRssCache } from "./rss"
 //公共接口controller
 export const getArticleListController=async (req:Request,res:Response)=>{
     const page = parseInt(req.query.page as string)
@@ -77,12 +78,15 @@ export const releaseArticleController=async(req:Request,res:Response)=>{
     if (!article.title || !article.content) {
         return res.error('缺少文章标题或内容')
     }
+    let result=null
     try {
-        return res.success(await releaseArticleService(article),'发布文章成功')
+        result = await releaseArticleService(article)
     } catch (err: any) {
         console.error('发布文章失败:', err)
         return res.error(err.message || '发布文章失败', 1, 500)
     }
+    await clearRssCache()
+    return res.success(result,`发布文章成功`)
 }
 export const updateArticleController=async(req:Request,res:Response)=>{
     const id = parseInt(req.params.id as string)
@@ -93,23 +97,28 @@ export const updateArticleController=async(req:Request,res:Response)=>{
     if (!article.title || !article.content) {
         return res.error('缺少文章标题或内容')
     }
+    let result=null
     try {
-        return res.success(await updateArticleService(id,article),`id:${id}更新文章成功`)
+        result = await updateArticleService(id,article)
     } catch (err: any) {
         console.error('id更新文章失败:', err)
         return res.error(err.message || 'id更新文章失败', 1, 500)
     }
+    await clearRssCache()
+    return res.success(result,`id:${id}更新文章成功`)
 }
 export const deleteArticleController=async(req:Request,res:Response)=>{
     const id = parseInt(req.params.id as string)
     if (!id) {
         return res.error('缺少文章 ID')
     }
+    let result=null
     try {
-        return res.success(await deleteArticleService(id),`id:${id}删除文章成功`)
+        result=await deleteArticleService(id)
     } catch (err: any) {
         console.error('id删除文章失败:', err)
         return res.error(err.message || 'id删除文章失败', 1, 500)
     }
+    await clearRssCache()
+    return res.success(result,`id:${id}删除文章成功`)
 }
-

@@ -11,7 +11,6 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
-    "@artsvg/vue": "^2.1.7",
     "@giscus/vue": "^3.1.1",
     "axios": "^1.18.1",
     "dompurify": "^3.4.13",

@@ -12,8 +12,9 @@
 | 语言 | TypeScript |
 | 后端框架 | Express 5（ESM，tsx 运行） |
 | 数据库 | MySQL 8.0（`mysql2` 连接池，原生 SQL） |
+| 缓存 / 会话 | Redis 7（`ioredis`：RSS 缓存、access token 黑名单、refresh token 白名单） |
 | 身份认证 | JWT（accessToken 1h + refreshToken 7d 存 httpOnly Cookie，401 自动刷新） |
-| 密码加密 | bcryptjs（10 轮） |
+| 密码校验 | bcryptjs（仅 `compare`；无注册/改密流程，故无哈希写入） |
 | 评论服务 | Giscus |
 | 限流 | 自定义限流器（分级：auth / article / global） |
 | 前端框架 | Vue 3（Composition API + `<script setup>`） |
@@ -21,7 +22,7 @@
 | 路由 | vue-router |
 | UI 组件库 | 主站：无（Tailwind CSS v4 毛玻璃设计系统）；管理台：Element Plus 全量引入 |
 | 构建工具 | Vite |
-| 容器化 | Docker Compose（3 容器 + MySQL，管理台独立 profile） |
+| 容器化 | Docker Compose（front / manager / back / db / redis，管理台独立 profile） |
 
 ---
 
@@ -44,19 +45,25 @@ DanicaWebSite/
 │   ├── type/index.ts             # TypeScript 类型定义
 │   ├── database/
 │   │   ├── index.ts              # MySQL2 连接池
+│   │   ├── query.ts              # Promise 化查询助手（queryRows / queryExec）
 │   │   └── DAO/
 │   │       ├── auth.ts           # 用户数据访问
 │   │       └── article.ts        # 文章数据访问
+│   ├── redis/
+│   │   ├── redis.ts              # ioredis 单例（直接导出实例，方法自带 Promise）
+│   │   └── DAO/
+│   │       ├── authmiddlewareRedis.ts  # access token 黑名单查询
+│   │       └── authServiceRedis.ts     # refresh 白名单 / 黑名单写入
 │   ├── service/
 │   │   ├── auth.ts               # 认证业务逻辑
 │   │   └── article.ts            # 文章业务逻辑
 │   ├── controllers/
-│   │   ├── auth.ts               # 登录/刷新/个人资料
+│   │   ├── auth.ts               # 登录/刷新/登出/个人资料
 │   │   ├── article.ts            # 文章 CRUD
 │   │   ├── upload.ts             # 图片上传
 │   │   └── rss.ts                # RSS 订阅源
 │   ├── routes/
-│   │   ├── auth.ts               # POST /login /refresh
+│   │   ├── auth.ts               # POST /login /refresh /logout
 │   │   ├── articles.ts           # 公开文章路由
 │   │   ├── articlesmanagerRoutes.ts  # 管理文章路由）
 │   │   ├── user.ts               # 用户资料路由
@@ -67,10 +74,10 @@ DanicaWebSite/
 │   │   ├── response.ts           # 统一响应格式
 │   │   └── rateLimit.ts          # 分级限流配置
 │   ├── utils/
+│   │   ├── index.ts              # 统一出口（re-export jwt/response/bcrypt）
 │   │   ├── jwt.ts                # JWT 签发/验证
-│   │   ├── bcrypt.ts             # 密码哈希
-│   │   ├── response.ts           # JSON 响应工具
-│   │   └── rateLimit.ts          # 限流器工厂
+│   │   ├── bcrypt.ts             # 密码校验（compare）
+│   │   └── response.ts           # JSON 响应工具
 │   └── tsconfig.json             # strict 类型检查
 │
 ├── front/                        # 公开主站
@@ -117,7 +124,7 @@ DanicaWebSite/
         ├── types/index.ts        # 类型
         ├── utils/
         │   ├── highlight.ts      # 搜索关键词高亮
-        │   └── markdown.ts       # Markdown 渲染
+        │   └── markdown.ts       # 纯文本摘要提取（stripMarkdown）
         ├── styles/global.css     # 全局样式 + CSS 变量
         ├── components/
         │   ├── AppLayout.vue     # 侧边导航
@@ -142,6 +149,22 @@ DanicaWebSite/
 | `/admin/auth` | 1 分钟 5 次 | 登录/刷新，防暴力破解 |
 | `/api/articles` | 15 分钟 100 次 | 公开文章读取，防爬虫 |
 | `/api`（全局） | 15 分钟 200 次 | 兜底限流 |
+
+---
+
+## Redis 缓存与登录态
+
+Redis 承担三类职责，key 统一 `blog:` 前缀、冒号分层：
+
+| Key | 类型 | TTL | 用途 |
+|-----|------|-----|------|
+| `blog:cache:rss` | String | 60s | RSS XML 缓存，命中不再查库 |
+| `blog:accesstokenblacklist:<jti>` | String | access token 剩余寿命 | 登出后让 access token 立即失效 |
+| `blog:refreshtokenwhitelist:<userId>` | Set（成员为 jti） | 7d | 有效 refresh 会话白名单，refresh 时校验并轮换 |
+
+- 降级策略：缓存读取失败回源 DB；中间件黑名单查询在 Redis 不可用时 fail-open（放行）；refresh 白名单校验 fail-closed（拒绝，安全优先）。
+- 相关代码：`back/redis/`（连接单例 + DAO）、`back/middleware/auth.ts`（黑名单校验）、`back/service/auth.ts`（登录 / 刷新 / 登出）。
+- 本地开发需在 `back/.env` 配置 `REDIS_HOST` / `REDIS_PORT`；Docker Compose 已内置 `redis` 服务。
 
 ---
 
@@ -216,6 +239,7 @@ cd front-manager && npm run build   # 含 vue-tsc 类型检查
 - [x] 暗色模式（跟随系统 / 手动切换，localStorage 持久化）
 - [x] 响应式布局（桌面 + 移动端）
 - [x] API 分级限流
+- [x] Redis 缓存 + token 黑名单 / refresh 白名单轮换
 - [x] Docker Compose 一键部署（管理台独立 profile）
 - [x] 主站毛玻璃风格 + Tailwind CSS v4（移除 Element Plus）
 - [x] 主站侧边栏（站长信息 / 标签云占位 / 音乐播放器占位）

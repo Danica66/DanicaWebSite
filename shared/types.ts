@@ -13,9 +13,7 @@ export interface LoginParams {
 
 export interface LoginResult {
   accesstoken: string
-  refreshtoken: string
   userId: number
-  username: string
   is_admin: number
 }
 
@@ -26,6 +24,7 @@ export interface RefreshResult {
 // JWT 载荷（后端解析 token 后挂到 req.user）
 export interface UserPayload {
   userId: number
+  jti: string
 }
 
 // ===== 用户 =====

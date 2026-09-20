@@ -3,11 +3,10 @@ import dotenv from 'dotenv'
 // 加载 .env 文件
 dotenv.config()
 
-export const config = {
+const config = {
   //server
   Cserver: {
-    port: parseInt(process.env.PORT || ''),
-    env: process.env.NODE_ENV || '',
+    port: parseInt(process.env.PORT || '3000'),
   },
 
   // JWT
@@ -17,21 +16,15 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
     refreshExpiresIn: process.env.REFRESH_EXPIRES_IN || '7d',
   },
-  //bcrypt
-  Cbcrypt: {
-    saltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || ''),
-  },
-
   //mysql
   Cdatabase: {
     host: process.env.DB_HOST || '',
-    port: parseInt(process.env.DB_PORT || ''),
+    port: parseInt(process.env.DB_PORT || '3306'),
     username: process.env.DB_USERNAME || '',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_DATABASE || '',
     // 连接池配置
     pool: {
-      min: 2,
       max: 10,
     },
   },
@@ -51,4 +44,4 @@ export const config = {
 }
 
 // 导出常用配置（方便使用）
-export const { Cserver, Cjwt, Cdatabase, Cbcrypt, Csite, CallowedOrigins } = config
+export const { Cserver, Cjwt, Cdatabase, Csite, CallowedOrigins } = config

@@ -9,8 +9,8 @@ export const authApi = {
   refresh() {
     return api.Post<RefreshResult>('/auth/refresh');
   },
-  logout() {
-    return api.Post<ApiResponse<unknown>>('/auth/logout');
+  logout(token?: string) {
+    return api.Post<ApiResponse<unknown>>('/auth/logout', {}, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
   },
 }
 

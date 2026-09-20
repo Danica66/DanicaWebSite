@@ -2,49 +2,39 @@ import { authApi } from "@/api/handleapi"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 
-const localstorageKey = {
-  accesstoken: 'accesstoken',
-  user: 'user',
-}
+const ACCESSTOKEN_KEY = 'accesstoken'
 
 export const useauthStore = defineStore('userLogin', () => {
-  const accesstoken = ref(localStorage.getItem(localstorageKey.accesstoken) || '')
-  const stored = localStorage.getItem(localstorageKey.user)
-  const user = ref(stored ? JSON.parse(stored) : null)
-
+  const accesstoken = ref(localStorage.getItem(ACCESSTOKEN_KEY) || '')
   const isLogin = computed(() => !!accesstoken.value)
-  const userId = computed(() => user.value?.id || '')
-  const username = computed(() => user.value?.name || '')
-  const isAdmin = computed(() => !!user.value?.isAdmin)
 
   const login = async (username: string, password: string) => {
     const res = await authApi.login({ username, password })
     const data = res.data
     accesstoken.value = data.accesstoken
-    user.value = { id: data.userId, name: data.username, isAdmin: data.is_admin }
-    localStorage.setItem(localstorageKey.accesstoken, data.accesstoken)
-    localStorage.setItem(localstorageKey.user, JSON.stringify(user.value))
+    localStorage.setItem(ACCESSTOKEN_KEY, data.accesstoken)
     return data.is_admin
   }
 
   const refresh = async () => {
     const res = await authApi.refresh()
     accesstoken.value = res.data.accesstoken
-    localStorage.setItem(localstorageKey.accesstoken, res.data.accesstoken)
+    localStorage.setItem(ACCESSTOKEN_KEY, res.data.accesstoken)
   }
 
   const logout = () => {
-    // 先清本地状态，再异步通知后端删 cookie；后端不可达时登出也不应阻塞
+    // 先清本地状态，再异步通知后端删 cookie 并注销旧 access token（带旧 token，后端才能写黑名单）
+    const token = accesstoken.value
     accesstoken.value = ''
-    user.value = null
-    localStorage.removeItem(localstorageKey.accesstoken)
-    localStorage.removeItem(localstorageKey.user)
-    authApi.logout().catch(() => {})
+    localStorage.removeItem(ACCESSTOKEN_KEY)
+    if (token) {
+      authApi.logout(token).catch(() => {})
+    }
   }
 
   return {
-    accesstoken, user,
-    isLogin, userId, username, isAdmin,
+    accesstoken,
+    isLogin,
     login, refresh, logout,
   }
 })

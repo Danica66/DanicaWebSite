@@ -9,10 +9,8 @@ const instance = axios.create({
   timeout,
 })
 
-instance.interceptors.response.use(
-  (res) => res.data,
-  (err) => Promise.reject(err),
-)
+// 只解包 data；错误交给调用方 catch（axios 默认即 reject，无需再包一层）
+instance.interceptors.response.use((res) => res.data)
 
 export function Get<T = unknown>(url: string, params = {}, config = {}): Promise<ApiResponse<T>> {
   return instance.get(url, { params, ...config })

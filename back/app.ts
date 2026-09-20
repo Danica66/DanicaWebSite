@@ -8,6 +8,7 @@ import rssRoutes from './routes/rss'
 import articlesmanagerRoutes from './routes/articlesmanagerRoutes'
 import uploadRoutes from './routes/upload'
 import cookieParser from 'cookie-parser'
+import path from 'path'
 import { authMiddleware , responseWrapper } from './middleware'
 import { Cserver, CallowedOrigins } from './config/index'
 import { authLimiter, publicLimiter, globalLimiter } from './middleware/rateLimit'
@@ -37,8 +38,8 @@ app.use((req, res, next) => {
 
 
 
-// 静态文件
-app.use('/api/images', express.static('/app/uploads'))
+// 静态文件：与上传落盘目录保持一致（back/uploads；Docker 下 cwd=/app 时即 /app/uploads）
+app.use('/api/images', express.static(path.resolve(process.cwd(), 'uploads')))
 // 限流
 app.use('/api', globalLimiter)
 // 查看文章

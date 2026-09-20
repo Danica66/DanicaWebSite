@@ -22,18 +22,5 @@ export const responseWrapper = (req: Request, res: Response, next: NextFunction)
     return this.status(401).json(errors.unauthorized(message))
   }
 
-  // res.internalError(message) -> 500 快捷方式
-  res.internalError = function (message: string) {
-    return this.status(500).json(errors.internal(message))
-  }
-  //res.badRequest(message)-> 400 快捷方式
-  res.badRequest=function(message:string){
-    return this.status(400).json(errors.badRequest(message))
-  }
-  //res.forbidden(message)-> 403 快捷方式
-  res.forbidden=function(message:string){
-    return this.status(403).json(errors.forbidden(message))
-  }
-
   next()
 }

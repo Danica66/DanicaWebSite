@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { LoginParams } from '../../shared/types'
-import { loginService, refreshService, getProfileService, updateProfileService } from '../service/auth'
+import { loginService, refreshService, getProfileService, updateProfileService,loggoutService } from '../service/auth'
 
 
 export const loginController = async (req: Request, res: Response) => {
@@ -19,6 +19,9 @@ export const loginController = async (req: Request, res: Response) => {
             maxAge: 7*24*60*60*1000,
             path: '/admin'
         })
+
+
+
         return res.success({accesstoken,userId,is_admin}, '登录成功')
     } catch (err: any) {
         console.error('登录失败:', err)
@@ -32,7 +35,16 @@ export const refreshController=async(req:Request,res:Response)=>{
         return res.error('缺少refreshtoken')
     }
     try {
-        return res.success(await refreshService(refreshtoken),'刷新成功')
+        const { accesstoken, refreshtoken: newRefreshtoken } = await refreshService(refreshtoken)
+        // 轮换 refresh token：与登录一致的配置写回新 cookie
+        res.cookie('refreshtoken', newRefreshtoken, {
+            httpOnly: true,
+            secure:  process.env.NODE_ENV==='production',
+            sameSite:'lax',
+            maxAge: 7*24*60*60*1000,
+            path: '/admin'
+        })
+        return res.success({ accesstoken }, '刷新成功')
     } catch (err: any) {
         console.error('刷新失败:', err)
         return res.error(err.message || '刷新失败，请稍后重试')
@@ -40,6 +52,14 @@ export const refreshController=async(req:Request,res:Response)=>{
 }
 export const logoutController=async(req:Request,res:Response)=>{
     // 清除 cookie 时 Path 必须与设置时一致（RFC 6265 §3.1），否则浏览器不会删除
+    // 登出清理 best-effort：access 黑名单 + 删除 refresh 会话，失败不影响登出
+    const accesstoken=req.headers.authorization?.split(' ')[1]
+    const refreshtoken=req.cookies.refreshtoken
+    try {
+        await loggoutService(accesstoken, refreshtoken)
+    } catch (err: any) {
+        console.error('登出清理失败:', err)
+    }
     res.clearCookie('refreshtoken',{
         httpOnly: true,
         secure:  process.env.NODE_ENV==='production',
