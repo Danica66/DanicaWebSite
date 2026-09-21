@@ -35,6 +35,9 @@ const config = {
     title: process.env.SITE_TITLE || '',
     description: process.env.SITE_DESCRIPTION || '',
   },
+  Credis:{
+    password: process.env.REDIS_PASSWORD || '',
+  },
 
   // CORS
   CallowedOrigins: (process.env.ALLOWED_ORIGINS || '')
@@ -44,4 +47,4 @@ const config = {
 }
 
 // 导出常用配置（方便使用）
-export const { Cserver, Cjwt, Cdatabase, Csite, CallowedOrigins } = config
+export const { Cserver, Cjwt, Cdatabase, Csite, Credis, CallowedOrigins } = config

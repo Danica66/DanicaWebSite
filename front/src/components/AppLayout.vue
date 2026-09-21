@@ -11,14 +11,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="relative flex min-h-screen flex-col bg-gradient-to-br from-sky-100 via-slate-100 to-rose-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
-    <!-- 背景装饰光斑：毛玻璃卡片模糊时能看到它们 -->
-    <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-      <div class="absolute -top-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-sky-300/40 blur-3xl dark:bg-sky-600/20" />
-      <div class="absolute top-1/3 -right-40 h-[26rem] w-[26rem] rounded-full bg-rose-300/40 blur-3xl dark:bg-rose-600/20" />
-      <div class="absolute -bottom-40 left-1/3 h-[28rem] w-[28rem] rounded-full bg-violet-300/40 blur-3xl dark:bg-violet-600/20" />
-    </div>
-
+  <div class="site-bg relative flex min-h-screen flex-col">
     <AppHeader />
 
     <main class="relative z-10 flex-1">
@@ -28,3 +21,22 @@ onMounted(() => {
     <AppFooter />
   </div>
 </template>
+
+<style scoped>
+/* 主体区域：40×40 网格线背景，固定不随滚动（亮 / 暗两套配色） */
+.site-bg {
+  background-color: #f8fafc;
+  background-image:
+    linear-gradient(rgba(139, 148, 158, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 148, 158, 0.2) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-attachment: fixed;
+}
+
+html.dark .site-bg {
+  background-color: #0d1117;
+  background-image:
+    linear-gradient(rgba(139, 148, 158, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 148, 158, 0.06) 1px, transparent 1px);
+}
+</style>

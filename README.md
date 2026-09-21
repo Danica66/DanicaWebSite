@@ -36,12 +36,16 @@ DanicaWebSite/
 ├── README.md                     # 本文件
 ├── docker-compose.yml            # 部署配置
 ├── docker-compose.example.yml    # 部署配置模板
+├── redis/
+│   └── redis.conf                # Redis 配置（AOF 持久化 / 内存策略）
 ├── shared/
 │   └── types.ts                  # 前后端共享的 API 契约类型
 │
 ├── back/                         # 后端（端口 3000）
 │   ├── app.ts                    # 入口：CORS / 响应包装 / JWT 鉴权 / 路由注册
-│   ├── config/index.ts           # 环境变量
+│   ├── config/
+│   │   ├── index.ts              # 环境变量
+│   │   └── redis.env             # Redis 密码单一来源（REDIS_PASSWORD）
 │   ├── type/index.ts             # TypeScript 类型定义
 │   ├── database/
 │   │   ├── index.ts              # MySQL2 连接池
@@ -74,9 +78,8 @@ DanicaWebSite/
 │   │   ├── response.ts           # 统一响应格式
 │   │   └── rateLimit.ts          # 分级限流配置
 │   ├── utils/
-│   │   ├── index.ts              # 统一出口（re-export jwt/response/bcrypt）
+│   │   ├── index.ts              # 统一出口（re-export jwt/response）
 │   │   ├── jwt.ts                # JWT 签发/验证
-│   │   ├── bcrypt.ts             # 密码校验（compare）
 │   │   └── response.ts           # JSON 响应工具
 │   └── tsconfig.json             # strict 类型检查
 │
@@ -101,7 +104,7 @@ DanicaWebSite/
 │       │   ├── ArticleCard.vue   # 文章卡片
 │       │   ├── SearchInput.vue   # 搜索输入框
 │       │   ├── Pagination.vue    # 分页器
-│       │   ├── StateTip.vue      # 加载 / 空 / 错 通用状态组件
+│       │   ├── StateTip.vue      # 加载 / 空 通用状态组件
 │       │   └── Sidebar/
 │       │       ├── SidebarLeft.vue   # 左侧边栏
 │       │       ├── SidebarRight.vue  # 右侧边栏
@@ -123,14 +126,12 @@ DanicaWebSite/
         │   └── handleapi.ts      
         ├── types/index.ts        # 类型
         ├── utils/
-        │   ├── highlight.ts      # 搜索关键词高亮
         │   └── markdown.ts       # 纯文本摘要提取（stripMarkdown）
         ├── styles/global.css     # 全局样式 + CSS 变量
         ├── components/
         │   ├── AppLayout.vue     # 侧边导航
         │   ├── AppHeaderFooter.vue  # 顶部导航
         │   ├── ArticleEdit.vue   # 文章编辑表单
-        │   ├── ArticleCard.vue   # 文章卡片
         │   └── AuthCard.vue      # 登录表单卡片
         └── views/
             ├── Login.vue         # 管理员登录
@@ -164,7 +165,9 @@ Redis 承担三类职责，key 统一 `blog:` 前缀、冒号分层：
 
 - 降级策略：缓存读取失败回源 DB；中间件黑名单查询在 Redis 不可用时 fail-open（放行）；refresh 白名单校验 fail-closed（拒绝，安全优先）。
 - 相关代码：`back/redis/`（连接单例 + DAO）、`back/middleware/auth.ts`（黑名单校验）、`back/service/auth.ts`（登录 / 刷新 / 登出）。
-- 本地开发需在 `back/.env` 配置 `REDIS_HOST` / `REDIS_PORT`；Docker Compose 已内置 `redis` 服务。
+- 密码单一来源：`back/config/redis.env` 的 `REDIS_PASSWORD`。compose 以 `env_file` 注入，redis 启动时 `--requirepass` 读取它，健康检查与后端复用同一变量。
+- 改密码只需编辑 `back/config/redis.env` 一处，再 `docker compose up -d redis back` 生效。
+- 本地开发（后端不进容器）需在 `back/.env` 配置 `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD`。
 
 ---
 
@@ -177,6 +180,7 @@ cp docker-compose.example.yml docker-compose.yml
 # 编辑 docker-compose.yml：
 #   1. 修改 DB_PASSWORD / JWT_SECRET / REFRESH_SECRET / SITE_URL / ALLOWED_ORIGINS 等
 #      （RESEND_API_KEY / MAIL_* 为历史残留变量，后端未使用，可删除）
+#   2. Redis 密码在 back/config/redis.env（默认 1234），改这一处即可
 #   2. 证书：front/ssl 与 front-manager/ssl 已放好 fullchain.pem / privkey.pem
 #      （源文件在 danicablog.cn_nginx/，更换域名时同步替换）
 docker compose up -d

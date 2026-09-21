@@ -1,6 +1,6 @@
 import api from "@/api"
 import type { ApiResponse, ArticlePayload, ArticleStatus } from "@/types"
-import type { ArticleListResult, ArticleDetail, LoginParams, LoginResult, RefreshResult, UserProfile } from "@/types"
+import type { ArticleListResult, ArticleDetail, LoginParams, LoginResult, RefreshResult } from "@/types"
 
 export const authApi = {
   login(data: LoginParams) {
@@ -30,15 +30,6 @@ export const articleApi = {
   },
   delete(id: number) {
     return api.Delete<ApiResponse<unknown>>(`/articles/${id}`);
-  },
-}
-
-export const userApi = {
-  getProfile() {
-    return api.Get<UserProfile>('/user/profile')
-  },
-  updateProfile(data: { email?: string; avatar?: string }) {
-    return api.Put<ApiResponse<unknown>>('/user/profile', data)
   },
 }
 

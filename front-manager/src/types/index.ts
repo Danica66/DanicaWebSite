@@ -9,4 +9,5 @@ export interface ArticleEditForm {
   content: string
   summary: string
   status: ArticleStatus
+  tag: string
 }

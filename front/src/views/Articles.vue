@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { articleApi } from '@/api/article'
 import type { ArticleListItem } from '@shared/types'
 import ArticleCard from '@/components/ArticleCard.vue'
@@ -8,10 +8,12 @@ import StateTip from '@/components/StateTip.vue'
 import SearchInput from '@/components/SearchInput.vue'
 import Pagination from '@/components/Pagination.vue'
 
+const route = useRoute()
 const router = useRouter()
 
 const articles = ref<ArticleListItem[]>([])
 const keyword = ref('')
+const activeTag = ref('')
 const page = ref(1)
 const total = ref(0)
 const loading = ref(false)
@@ -20,7 +22,7 @@ const limit = 10
 const fetchArticles = async () => {
   loading.value = true
   try {
-    const res = await articleApi.getList({ page: page.value, limit, keyword: keyword.value })
+    const res = await articleApi.getList({ page: page.value, limit, keyword: keyword.value, tag: activeTag.value })
     articles.value = res.data.list || []
     total.value = res.data.total || 0
   } catch {
@@ -29,6 +31,12 @@ const fetchArticles = async () => {
     loading.value = false
   }
 }
+
+// 标签过滤来自 URL（标签云点击跳转过来）
+const syncTag = () => {
+  activeTag.value = typeof route.query.tag === 'string' ? route.query.tag : ''
+}
+const clearTag = () => router.push('/articles')
 
 // 搜索：回到第一页重新加载
 const handleSearch = () => {
@@ -45,7 +53,17 @@ const handlePageChange = (newPage: number) => {
 
 const goDetail = (id: number) => router.push(`/articles/${id}`)
 
-onMounted(fetchArticles)
+onMounted(() => {
+  syncTag()
+  fetchArticles()
+})
+
+// 点击标签云跳转过来（URL 的 tag 变化）→ 回到第一页重新加载
+watch(() => route.query.tag, () => {
+  syncTag()
+  page.value = 1
+  fetchArticles()
+})
 </script>
 
 <template>
@@ -53,7 +71,13 @@ onMounted(fetchArticles)
   <div class="mx-auto max-w-[900px] px-6 py-10">
     <!-- 标题 + 搜索框（同一行左右分布） -->
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">文章列表</h2>
+      <div class="flex items-center gap-3">
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">文章列表</h2>
+        <span v-if="activeTag" class="glass-chip gap-1.5">
+          #{{ activeTag }}
+          <button type="button" class="text-slate-400 transition-colors hover:text-primary" title="清除标签过滤" @click="clearTag">×</button>
+        </span>
+      </div>
       <SearchInput v-model="keyword" @search="handleSearch" />
     </div>
 

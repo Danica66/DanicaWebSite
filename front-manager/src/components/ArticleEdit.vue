@@ -80,6 +80,9 @@ const handleSave = () => {
       <el-form-item label="摘要">
         <el-input v-model="form.summary" type="textarea" :rows="2" placeholder="文章摘要（可选）" />
       </el-form-item>
+      <el-form-item label="标签">
+        <el-input v-model="form.tag" placeholder="单个标签，如 Vue（可选）" maxlength="255" />
+      </el-form-item>
       <el-form-item label="内容" required>
         <textarea
           ref="contentTextarea"

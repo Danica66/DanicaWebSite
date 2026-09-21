@@ -1,6 +1,6 @@
 import { LoginParams, UserProfileUpdate } from "../../shared/types"
 import { select_username, select_user_by_id, update_user } from "../database/DAO/auth" 
-import { compare } from "../utils"
+import bcrypt from "bcryptjs"
 import { JwtPayload } from 'jsonwebtoken'
 import { logoutServiceRedis, loginServiceRedis, refreshServiceRedis, removeRefreshSession } from "../redis/DAO/authServiceRedis"
 import { generateToken, generateRefreshToken, verifyRefreshToken, decodeToken } from "../utils"
@@ -11,7 +11,7 @@ export const loginService = async (body: LoginParams) => {
         throw new Error("用户名或密码错误")
     }
     const user = users[0]
-    if (!await compare(body.password, user.password)) {
+    if (!await bcrypt.compare(body.password, user.password)) {
         throw new Error("用户名或密码错误")
     }
     const userId = user.id

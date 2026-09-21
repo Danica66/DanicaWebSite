@@ -43,7 +43,7 @@ onMounted(fetchRecent)
     <!-- 三列网格：左 240 / 中 1fr / 右 260（随断点收缩） -->
     <div
       id="recent"
-      class="mx-auto max-w-6xl scroll-mt-20 px-6 pt-10 pb-16 grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr] lg:grid-cols-[200px_1fr_220px] xl:grid-cols-[240px_1fr_260px]"
+      class="mx-auto max-w-6xl scroll-mt-20 border-t border-[color:rgba(139,148,158,0.3)] px-6 pt-10 pb-16 grid grid-cols-1 gap-6 md:grid-cols-[200px_1fr] lg:grid-cols-[200px_1fr_220px] xl:grid-cols-[240px_1fr_260px] dark:border-[color:rgba(139,148,158,0.1)]"
     >
       <!-- 左侧边栏：个人信息（粘性） -->
       <div class="md:sticky md:top-20 md:self-start">

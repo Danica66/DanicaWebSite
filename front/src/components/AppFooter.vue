@@ -24,9 +24,6 @@ const year = new Date().getFullYear()
         >
           黑公网安备23100002000275号
         </a>
-        <a href="/api/rss" target="_blank" rel="noopener" class="transition-colors hover:text-primary">
-          RSS 订阅
-        </a>
       </div>
     </div>
   </footer>

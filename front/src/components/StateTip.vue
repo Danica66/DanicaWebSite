@@ -1,12 +1,11 @@
 <script setup lang="ts">
 defineProps<{
-  type?: 'loading' | 'empty' | 'error'
+  type?: 'loading' | 'empty'
   message?: string
 }>()
 
-const text = (type?: 'loading' | 'empty' | 'error', message?: string) => {
+const text = (type?: 'loading' | 'empty', message?: string) => {
   if (type === 'loading') return '加载中...'
-  if (type === 'error') return message || '出错了'
   return message || '暂无数据'
 }
 </script>
@@ -20,7 +19,7 @@ const text = (type?: 'loading' | 'empty' | 'error', message?: string) => {
       role="status"
       aria-label="加载中"
     />
-    <p class="mt-4 text-sm" :class="type === 'error' ? 'text-amber-500' : ''">
+    <p class="mt-4 text-sm">
       {{ text(type, message) }}
     </p>
     <slot />

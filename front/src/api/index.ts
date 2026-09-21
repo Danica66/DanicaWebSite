@@ -12,18 +12,9 @@ const instance = axios.create({
 // 只解包 data；错误交给调用方 catch（axios 默认即 reject，无需再包一层）
 instance.interceptors.response.use((res) => res.data)
 
-export function Get<T = unknown>(url: string, params = {}, config = {}): Promise<ApiResponse<T>> {
-  return instance.get(url, { params, ...config })
-}
-export function Post<T = unknown>(url: string, data = {}, config = {}): Promise<ApiResponse<T>> {
-  return instance.post(url, data, config)
-}
-export function Put<T = unknown>(url: string, data = {}, config = {}): Promise<ApiResponse<T>> {
-  return instance.put(url, data, config)
-}
-export function Delete<T = unknown>(url: string, config = {}): Promise<ApiResponse<T>> {
-  return instance.delete(url, config)
+export function Get<T = unknown>(url: string, params = {}): Promise<ApiResponse<T>> {
+  return instance.get(url, { params })
 }
 
-const api = { Get, Post, Put, Delete }
+const api = { Get }
 export default api

@@ -20,6 +20,7 @@ const singlearticledata = ref<ArticleEditForm>({
   content: '',
   summary: '',
   status: 'draft',
+  tag: '',
 })
 
 //获取文章
@@ -39,6 +40,7 @@ const fetcharticleById=async(id:number)=>{
             content: a.content || '',
             summary: a.summary || '',
             status: a.status === 'published' ? 'published' : 'draft',
+            tag: a.tag || '',
         }
     } catch (error) {
         ElMessage.error('加载文章详情失败')
@@ -72,6 +74,7 @@ const savearticle = async () => {
       content: singlearticledata.value.content,
       summary: singlearticledata.value.summary,
       status: singlearticledata.value.status,
+      tag: singlearticledata.value.tag,
     })
     ElMessage.success('保存成功')
     editdialogVisible.value = false

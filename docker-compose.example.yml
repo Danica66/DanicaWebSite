@@ -17,11 +17,29 @@ services:
       retries: 5
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: danica-redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-change_me}
+    command: ["sh", "-c", "exec redis-server /usr/local/etc/redis/redis.conf --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   back:
     build: ./back
     container_name: danica-back
     ports:
       - "3000:3000"
+    env_file:
+      - ./back/config/redis.env
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -30,6 +48,9 @@ services:
       - DB_USERNAME=${DB_USERNAME:-root}
       - DB_PASSWORD=${DB_PASSWORD:-请修改我}
       - DB_DATABASE=${DB_DATABASE:-my_website}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-change_me}
       - JWT_SECRET=${JWT_SECRET:-请生成一个随机字符串}
       - REFRESH_SECRET=${REFRESH_SECRET:-请生成另一个随机字符串}
       - JWT_EXPIRES_IN=1h
@@ -45,6 +66,8 @@ services:
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://your-domain.com}
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
 
@@ -69,3 +92,4 @@ services:
 
 volumes:
   mysql-data:
+  redis-data:

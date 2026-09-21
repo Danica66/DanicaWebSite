@@ -17,6 +17,7 @@ const form = ref<ArticleEditForm>({
   content: '',
   summary: '',
   status: 'draft',
+  tag: '',
 })
 
 const handleSubmit = async () => {
@@ -28,6 +29,7 @@ const handleSubmit = async () => {
       content: form.value.content,
       summary: form.value.summary || stripMarkdown(form.value.content, 150),
       status: form.value.status,
+      tag: form.value.tag,
     })
     router.push('/articles')
   } catch {

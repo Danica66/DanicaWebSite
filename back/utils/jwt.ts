@@ -35,5 +35,3 @@ export const verifyRefreshToken = (token: string) => {
 }
 
 export const decodeToken = (token: string) => jwt.decode(token)
-
-export default { generateToken, generateRefreshToken, verifyToken, verifyRefreshToken, decodeToken }

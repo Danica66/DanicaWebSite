@@ -49,6 +49,3 @@ export const removeRefreshSession = async (userId: number, jti: string) => {
         console.error('Redis 会话移除失败:', error)
     }
 }
-
-
-export default { logoutServiceRedis, removeRefreshSession, loginServiceRedis, refreshServiceRedis }

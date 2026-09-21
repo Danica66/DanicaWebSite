@@ -51,7 +51,7 @@ const go = (page: number) => {
     </button>
 
     <template v-for="(p, i) in pages" :key="i">
-      <span v-if="p === '…'" class="px-1 text-slate-400">…</span>
+      <span v-if="p === '…'" class="px-1 text-slate-400 dark:text-slate-500">…</span>
       <button
         v-else
         type="button"

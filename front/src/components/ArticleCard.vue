@@ -6,7 +6,6 @@ defineProps<{
   article: any
   clickable?: boolean
   showArrow?: boolean
-  showStatus?: boolean
   highlight?: string
 }>()
 
@@ -14,7 +13,6 @@ defineEmits<{
   click: [id: number]
 }>()
 
-const statusLabel = (s: string) => (s === 'published' ? '已发布' : '草稿')
 const summaryText = (content: string) => {
   return content ? stripMarkdown(content, 120) : ''
 }
@@ -38,10 +36,13 @@ const summaryText = (content: string) => {
         class="mb-3 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400"
         v-html="highlightText(article.summary || summaryText(article.content), highlight)"
       />
-      <!-- 元信息：状态 / 日期 / 阅读量 -->
+      <!-- 元信息：标签 / 状态 / 日期 / 阅读量 -->
       <div class="flex flex-wrap items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
-        <span v-if="showStatus" :class="['glass-chip', article.status === 'published' ? '!text-emerald-600 dark:!text-emerald-400' : '!text-amber-600 dark:!text-amber-400']">
-          {{ statusLabel(article.status) }}
+        <span
+          v-if="article.tag"
+          class="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary"
+        >
+          #{{ article.tag }}
         </span>
         <span class="inline-flex items-center gap-1.5">
           <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">

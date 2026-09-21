@@ -164,6 +164,12 @@ onMounted(fetchArticle)
             {{ article.title }}
           </h1>
           <div class="mt-4 flex flex-wrap items-center gap-5 text-sm text-slate-400 dark:text-slate-500">
+            <span
+              v-if="article.tag"
+              class="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary"
+            >
+              #{{ article.tag }}
+            </span>
             <span class="inline-flex items-center gap-1.5">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" />

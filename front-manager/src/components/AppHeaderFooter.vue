@@ -88,37 +88,6 @@ const handleLogout = () => {
   text-decoration: none;
   user-select: none;
 }
-
-/* 汉堡按钮（默认隐藏，移动端显示） */
-.hamburger {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: var(--text);
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  font-size: 15px;
-}
-.nav-links a {
-  color: var(--text);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.nav-links a:hover {
-  color: var(--primary);
-}
-.rss-nav {
-  color: #e6a23c !important;
-  font-weight: 500;
-}
 .theme-btn {
   font-size: 18px;
   cursor: pointer;
@@ -128,11 +97,6 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-.user-tag {
-  color: var(--text-muted);
-  cursor: default;
-  font-size: 14px;
 }
 .logout-btn {
   color: #e6a23c;
@@ -159,29 +123,6 @@ const handleLogout = () => {
 @media (max-width: 768px) {
   .nav-inner {
     padding: 0 16px;
-  }
-
-  /* 显示汉堡按钮 */
-  .hamburger {
-    display: block;
-  }
-
-  /* 导航链接收起，展开时变成竖向菜单 */
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 56px;
-    left: 0;
-    right: 0;
-    background: var(--navbar-bg);
-    padding: 16px;
-    gap: 14px;
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 4px 12px var(--shadow);
-  }
-  .nav-links.open {
-    display: flex;
   }
 }
 </style>

@@ -1,17 +1,25 @@
-import { select_article,select_article_count,select_articlebyid,insert_article,delete_articlebyid,update_article_viewcount,update_article} from "../database/DAO/article"
+import { select_article,select_article_count,select_articlebyid,insert_article,delete_articlebyid,update_article_viewcount,update_article,select_tags} from "../database/DAO/article"
 import { Article, ArticleStatus } from "../../shared/types"
-export const getArticleListService=async (page:number,limit:number,keyword:string,status:ArticleStatus='published')=>{
+
+// 标签列占位默认值 'EMPTY STRING' 等同于“没有标签”
+const cleanTag = (v: unknown) => (v && v !== 'EMPTY STRING' ? String(v) : '')
+
+export const getArticleListService=async (page:number,limit:number,keyword:string,status:ArticleStatus='published',tag='')=>{
     const [list, countResult] = await Promise.all([
-        select_article(page, limit, keyword,status),
-        select_article_count(keyword,status),
+        select_article(page, limit, keyword,status,tag),
+        select_article_count(keyword,status,tag),
     ])
     const total = (countResult[0] as any).total || 0
     return { list, total }
 }
+export const getTagsService=async ()=>{
+    return await select_tags()
+}
 export const getSingleArticleService=async(id:number, countView: boolean = true)=>{
     if (countView) await update_article_viewcount(id)
     const rows = await select_articlebyid(id)
-    return rows[0] || null
+    const row = rows[0] as any
+    return row ? { ...row, tag: cleanTag(row.tag) } : null
 }
 export const releaseArticleService=async(article:Article)=>{
     return await insert_article(article)

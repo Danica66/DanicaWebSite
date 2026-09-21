@@ -34,7 +34,6 @@ export interface UserProfile {
   username: string
   email: string | null
   avatar: string | null
-  email_verified: number
   created_at: string
 }
 
@@ -53,9 +52,9 @@ export interface ArticleListItem {
   title: string
   summary: string | null
   cover_image: string | null
-  author_id: number
   view_count: number
   created_at: string
+  tag: string
 }
 
 // 文章详情（getDetail 返回，含 content/status）
@@ -71,6 +70,12 @@ export interface ArticleListResult {
   total: number
 }
 
+// 标签聚合（标签云用：标签名 + 文章数）
+export interface TagCount {
+  tag: string
+  count: number
+}
+
 // 创建/更新文章请求体
 export interface ArticlePayload {
   title: string
@@ -78,9 +83,10 @@ export interface ArticlePayload {
   summary?: string
   cover_image?: string
   status?: ArticleStatus
+  tag?: string
 }
 
-// 文章实体（后端业务层使用，含 author_id 与数据库字段）
+// 文章实体（后端业务层使用，对应数据库字段）
 export interface Article {
   id?: number
   title: string
@@ -88,7 +94,6 @@ export interface Article {
   content: string
   summary?: string
   cover_image?: string
-  author_id: number
   view_count?: number
   created_at?: string
   updated_at?: string

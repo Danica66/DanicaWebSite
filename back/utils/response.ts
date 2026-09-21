@@ -10,5 +10,3 @@ export const errors = {
   notFound: (msg: string) => error(`资源不存在: ${msg}`, 404),
   unauthorized: (msg: string) => error(`未授权: ${msg}`, 401),
 }
-
-export default { success, error, errors }

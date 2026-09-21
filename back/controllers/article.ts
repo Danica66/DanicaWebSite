@@ -1,12 +1,15 @@
 import { Request,Response } from "express"
-import { getSingleArticleService,getArticleListService,updateArticleService,deleteArticleService,releaseArticleService} from "../service/article"
+import { getSingleArticleService,getArticleListService,updateArticleService,deleteArticleService,releaseArticleService,getTagsService} from "../service/article"
 import { Article, ArticleStatus } from "../../shared/types"
 import { clearRssCache } from "./rss"
+// 查询参数里的 tag：只接受字符串（数组/其他类型一律当没有传）
+const queryTag = (raw: unknown) => (typeof raw === 'string' ? raw : '')
 //公共接口controller
 export const getArticleListController=async (req:Request,res:Response)=>{
     const page = parseInt(req.query.page as string)
     const limit = parseInt(req.query.limit as string)
     const keyword = req.query.keyword as string
+    const tag = queryTag(req.query.tag)
     if (!page || page < 1) {
         return res.error('page 必须 >= 1')
     }
@@ -14,10 +17,19 @@ export const getArticleListController=async (req:Request,res:Response)=>{
         return res.error('limit 必须为 1–100')
     }
     try {
-        return res.success(await getArticleListService(page,limit,keyword,'published'),`获取文章成功`)
+        return res.success(await getArticleListService(page,limit,keyword,'published',tag),`获取文章成功`)
     } catch (err: any) {
         console.error('获取文章失败:', err)
         return res.error(err.message || '获取文章失败', 1, 500)
+    }
+}
+//标签聚合（标签云数据源）
+export const getTagsController=async (_req:Request,res:Response)=>{
+    try {
+        return res.success(await getTagsService(),'获取标签成功')
+    } catch (err: any) {
+        console.error('获取标签失败:', err)
+        return res.error(err.message || '获取标签失败', 1, 500)
     }
 }
 //管理员接口controller
@@ -26,6 +38,7 @@ export const getArticleListManagerController=async (req:Request,res:Response)=>{
     const limit = parseInt(req.query.limit as string)
     const keyword = req.query.keyword as string
     const status=req.query.status as ArticleStatus
+    const tag = queryTag(req.query.tag)
     if (!page || page < 1) {
         return res.error('page 必须 >= 1')
     }
@@ -33,7 +46,7 @@ export const getArticleListManagerController=async (req:Request,res:Response)=>{
         return res.error('limit 必须为 1–100')
     }
     try {
-        return res.success(await getArticleListService(page,limit,keyword,status),`获取${status}文章成功`)
+        return res.success(await getArticleListService(page,limit,keyword,status,tag),`获取${status}文章成功`)
     } catch (err: any) {
         console.error('获取文章失败:', err)
         return res.error(err.message || '获取文章失败', 1, 500)
@@ -73,7 +86,7 @@ export const releaseArticleController=async(req:Request,res:Response)=>{
         summary: req.body.summary,
         cover_image: req.body.cover_image,
         status: req.body.status,
-        author_id: req.user.userId
+        tag: req.body.tag
     }
     if (!article.title || !article.content) {
         return res.error('缺少文章标题或内容')
